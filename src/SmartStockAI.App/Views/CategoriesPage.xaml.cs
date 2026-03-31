@@ -1,41 +1,48 @@
 using System.Collections.ObjectModel;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.EntityFrameworkCore;
 using SmartStockAI.App.Models;
-using SmartStockAI.App.Services;
-using SmartStockAI.Core.Entities;
+using SmartStockAI.Core.Contracts.Categories;
+using SmartStockAI.Core.Contracts.Products;
 
 namespace SmartStockAI.App.Views;
 
 public partial class CategoriesPage : Page
 {
+    private readonly ICategoryService _categoryService;
+    private readonly IProductService _productService;
     private readonly ObservableCollection<CategoryListItem> _categories = [];
     private int? _selectedCategoryId;
 
-    public CategoriesPage()
+    public CategoriesPage(ICategoryService categoryService, IProductService productService)
     {
+        _categoryService = categoryService;
+        _productService = productService;
         InitializeComponent();
         Loaded += OnLoaded;
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         if (CategoriesDataGrid.ItemsSource is null)
         {
             CategoriesDataGrid.ItemsSource = _categories;
         }
 
-        LoadCategories();
+        await LoadCategoriesAsync();
         ResetEditor();
     }
 
-    private void LoadCategories()
+    private async Task LoadCategoriesAsync()
     {
-        using var db = AppDbContextProvider.Create();
+        var categories = await _categoryService.GetAllAsync();
+        var products = await _productService.GetAllAsync();
+        var productCounts = products
+            .Where(x => x.CategoryId.HasValue)
+            .GroupBy(x => x.CategoryId!.Value)
+            .ToDictionary(x => x.Key, x => x.Count());
 
-        var lookup = db.Categories.AsNoTracking()
+        var lookup = categories
             .OrderBy(x => x.Name)
             .Select(x => new LookupItem { Id = x.Id, Name = x.Name })
             .ToList();
@@ -46,17 +53,14 @@ public partial class CategoriesPage : Page
             ParentCategoryComboBox.SelectedIndex = 0;
         }
 
-        var items = db.Categories
-            .AsNoTracking()
-            .Include(x => x.ParentCategory)
-            .Include(x => x.Products)
+        var items = categories
             .OrderBy(x => x.Name)
             .Select(x => new CategoryListItem
             {
                 Id = x.Id,
                 Name = x.Name,
-                ParentName = x.ParentCategory != null ? x.ParentCategory.Name : "Корень",
-                ProductCount = x.Products.Count
+                ParentName = x.ParentCategoryName ?? "Корень",
+                ProductCount = productCounts.GetValueOrDefault(x.Id)
             })
             .ToList();
 
@@ -67,15 +71,14 @@ public partial class CategoriesPage : Page
         }
     }
 
-    private void CategoriesDataGrid_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void CategoriesDataGrid_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (CategoriesDataGrid.SelectedItem is not CategoryListItem item)
         {
             return;
         }
 
-        using var db = AppDbContextProvider.Create();
-        var category = db.Categories.AsNoTracking().FirstOrDefault(x => x.Id == item.Id);
+        var category = await _categoryService.GetByIdAsync(item.Id);
         if (category is null)
         {
             return;
@@ -87,7 +90,7 @@ public partial class CategoriesPage : Page
         ParentCategoryComboBox.SelectedValue = category.ParentCategoryId;
     }
 
-    private void SaveButton_OnClick(object sender, RoutedEventArgs e)
+    private async void SaveButton_OnClick(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(CategoryNameTextBox.Text))
         {
@@ -95,24 +98,36 @@ public partial class CategoriesPage : Page
             return;
         }
 
-        using var db = AppDbContextProvider.Create();
-        Category category;
-        if (_selectedCategoryId.HasValue)
+        try
         {
-            category = db.Categories.First(x => x.Id == _selectedCategoryId.Value);
+            CategoryDto? category;
+            if (_selectedCategoryId.HasValue)
+            {
+                category = await _categoryService.UpdateAsync(_selectedCategoryId.Value, new UpdateCategoryRequest
+                {
+                    Name = CategoryNameTextBox.Text.Trim(),
+                    ParentCategoryId = ParentCategoryComboBox.SelectedValue as int?
+                });
+            }
+            else
+            {
+                category = await _categoryService.CreateAsync(new CreateCategoryRequest
+                {
+                    Name = CategoryNameTextBox.Text.Trim(),
+                    ParentCategoryId = ParentCategoryComboBox.SelectedValue as int?
+                });
+            }
+
+            await LoadCategoriesAsync();
+            if (category is not null)
+            {
+                SelectCategory(category.Id);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            category = new Category();
-            db.Categories.Add(category);
+            MessageBox.Show(ex.Message, "Категории", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-
-        category.Name = CategoryNameTextBox.Text.Trim();
-        category.ParentCategoryId = ParentCategoryComboBox.SelectedValue as int?;
-        db.SaveChanges();
-
-        LoadCategories();
-        SelectCategory(category.Id);
     }
 
     private void SelectCategory(int categoryId)
@@ -131,9 +146,9 @@ public partial class CategoriesPage : Page
         CategoriesDataGrid.UnselectAll();
     }
 
-    private void ReloadButton_OnClick(object sender, RoutedEventArgs e)
+    private async void ReloadButton_OnClick(object sender, RoutedEventArgs e)
     {
-        LoadCategories();
+        await LoadCategoriesAsync();
     }
 
     private void ResetEditor()

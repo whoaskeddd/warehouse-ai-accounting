@@ -2,57 +2,65 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.EntityFrameworkCore;
 using SmartStockAI.App.Models;
-using SmartStockAI.App.Services;
-using SmartStockAI.Core.Entities;
+using SmartStockAI.Core.Contracts.Categories;
+using SmartStockAI.Core.Contracts.Locations;
+using SmartStockAI.Core.Contracts.Products;
+using SmartStockAI.Core.Contracts.Suppliers;
 
 namespace SmartStockAI.App.Views;
 
 public partial class ProductsPage : Page
 {
+    private readonly IProductService _productService;
+    private readonly ICategoryService _categoryService;
+    private readonly ISupplierService _supplierService;
+    private readonly ILocationService _locationService;
     private readonly ObservableCollection<ProductListItem> _products = [];
     private List<LookupItem> _categories = [];
     private List<LookupItem> _suppliers = [];
     private List<LookupItem> _locations = [];
     private int? _selectedProductId;
 
-    public ProductsPage()
+    public ProductsPage(
+        IProductService productService,
+        ICategoryService categoryService,
+        ISupplierService supplierService,
+        ILocationService locationService)
     {
+        _productService = productService;
+        _categoryService = categoryService;
+        _supplierService = supplierService;
+        _locationService = locationService;
         InitializeComponent();
         Loaded += OnLoaded;
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         if (ProductsDataGrid.ItemsSource is null)
         {
             ProductsDataGrid.ItemsSource = _products;
         }
 
-        LoadLookups();
-        LoadProducts();
+        await LoadLookupsAsync();
+        await LoadProductsAsync();
         ResetEditor();
     }
 
-    private void LoadLookups()
+    private async Task LoadLookupsAsync()
     {
-        using var db = AppDbContextProvider.Create();
-
-        _categories = db.Categories
-            .AsNoTracking()
+        _categories = (await _categoryService.GetAllAsync())
             .OrderBy(x => x.Name)
             .Select(x => new LookupItem { Id = x.Id, Name = x.Name })
             .ToList();
 
-        _suppliers = db.Suppliers
-            .AsNoTracking()
+        _suppliers = (await _supplierService.GetAllAsync())
             .OrderBy(x => x.Name)
             .Select(x => new LookupItem { Id = x.Id, Name = x.Name })
             .ToList();
 
-        _locations = db.Locations
-            .AsNoTracking()
+        _locations = (await _locationService.GetAllAsync())
             .OrderBy(x => x.Name)
             .Select(x => new LookupItem { Id = x.Id, Name = x.Name })
             .ToList();
@@ -81,21 +89,16 @@ public partial class ProductsPage : Page
         return [new LookupItem { Id = null, Name = emptyTitle }, .. items];
     }
 
-    private void LoadProducts()
+    private async Task LoadProductsAsync()
     {
-        using var db = AppDbContextProvider.Create();
-
-        var query = db.Products
-            .AsNoTracking()
-            .Include(x => x.Category)
-            .Include(x => x.Supplier)
-            .Include(x => x.Location)
-            .AsQueryable();
+        IEnumerable<ProductDto> query = await _productService.GetAllAsync();
 
         var search = SearchBox.Text.Trim();
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(x => x.Name.Contains(search) || x.Sku.Contains(search));
+            query = query.Where(x =>
+                x.Name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                x.Sku.Contains(search, StringComparison.OrdinalIgnoreCase));
         }
 
         if (CategoryFilterComboBox.SelectedValue is int categoryId)
@@ -115,9 +118,9 @@ public partial class ProductsPage : Page
                 Id = x.Id,
                 Sku = x.Sku,
                 Name = x.Name,
-                CategoryName = x.Category != null ? x.Category.Name : "Без категории",
-                SupplierName = x.Supplier != null ? x.Supplier.Name : "Без поставщика",
-                LocationName = x.Location != null ? x.Location.Name : "Без локации",
+                CategoryName = x.CategoryName ?? "Без категории",
+                SupplierName = x.SupplierName ?? "Без поставщика",
+                LocationName = x.LocationName ?? "Без локации",
                 CurrentStock = x.CurrentStock,
                 MinStock = x.MinStock,
                 PurchasePrice = x.PurchasePrice,
@@ -134,15 +137,14 @@ public partial class ProductsPage : Page
         ProductsCountText.Text = $"{_products.Count} позиций";
     }
 
-    private void ProductsDataGrid_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void ProductsDataGrid_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (ProductsDataGrid.SelectedItem is not ProductListItem item)
         {
             return;
         }
 
-        using var db = AppDbContextProvider.Create();
-        var product = db.Products.AsNoTracking().FirstOrDefault(x => x.Id == item.Id);
+        var product = await _productService.GetByIdAsync(item.Id);
         if (product is null)
         {
             return;
@@ -162,7 +164,7 @@ public partial class ProductsPage : Page
         LocationEditorComboBox.SelectedValue = product.LocationId;
     }
 
-    private void SaveProductButton_OnClick(object sender, RoutedEventArgs e)
+    private async void SaveProductButton_OnClick(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(SkuTextBox.Text) || string.IsNullOrWhiteSpace(NameTextBox.Text))
         {
@@ -179,34 +181,54 @@ public partial class ProductsPage : Page
             return;
         }
 
-        using var db = AppDbContextProvider.Create();
-
-        Product product;
-        if (_selectedProductId.HasValue)
+        var baseRequest = new CreateProductRequest
         {
-            product = db.Products.First(x => x.Id == _selectedProductId.Value);
-        }
-        else
+            Sku = SkuTextBox.Text.Trim(),
+            Name = NameTextBox.Text.Trim(),
+            Unit = string.IsNullOrWhiteSpace(UnitTextBox.Text) ? "шт" : UnitTextBox.Text.Trim(),
+            CurrentStock = currentStock,
+            MinStock = minStock,
+            PurchasePrice = purchasePrice,
+            SalePrice = salePrice,
+            CategoryId = CategoryEditorComboBox.SelectedValue as int?,
+            SupplierId = SupplierEditorComboBox.SelectedValue as int?,
+            LocationId = LocationEditorComboBox.SelectedValue as int?
+        };
+
+        try
         {
-            product = new Product();
-            db.Products.Add(product);
+            ProductDto? product;
+            if (_selectedProductId.HasValue)
+            {
+                product = await _productService.UpdateAsync(_selectedProductId.Value, new UpdateProductRequest
+                {
+                    Sku = baseRequest.Sku,
+                    Name = baseRequest.Name,
+                    Unit = baseRequest.Unit,
+                    CurrentStock = baseRequest.CurrentStock,
+                    MinStock = baseRequest.MinStock,
+                    PurchasePrice = baseRequest.PurchasePrice,
+                    SalePrice = baseRequest.SalePrice,
+                    CategoryId = baseRequest.CategoryId,
+                    SupplierId = baseRequest.SupplierId,
+                    LocationId = baseRequest.LocationId
+                });
+            }
+            else
+            {
+                product = await _productService.CreateAsync(baseRequest);
+            }
+
+            await LoadProductsAsync();
+            if (product is not null)
+            {
+                SelectProduct(product.Id);
+            }
         }
-
-        product.Sku = SkuTextBox.Text.Trim();
-        product.Name = NameTextBox.Text.Trim();
-        product.Unit = string.IsNullOrWhiteSpace(UnitTextBox.Text) ? "шт" : UnitTextBox.Text.Trim();
-        product.CurrentStock = currentStock;
-        product.MinStock = minStock;
-        product.PurchasePrice = purchasePrice;
-        product.SalePrice = salePrice;
-        product.CategoryId = CategoryEditorComboBox.SelectedValue as int?;
-        product.SupplierId = SupplierEditorComboBox.SelectedValue as int?;
-        product.LocationId = LocationEditorComboBox.SelectedValue as int?;
-
-        db.SaveChanges();
-
-        LoadProducts();
-        SelectProduct(product.Id);
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Товары", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private void SelectProduct(int productId)
@@ -231,10 +253,10 @@ public partial class ProductsPage : Page
         ProductsDataGrid.UnselectAll();
     }
 
-    private void ReloadButton_OnClick(object sender, RoutedEventArgs e)
+    private async void ReloadButton_OnClick(object sender, RoutedEventArgs e)
     {
-        LoadLookups();
-        LoadProducts();
+        await LoadLookupsAsync();
+        await LoadProductsAsync();
     }
 
     private void ResetEditor()
@@ -253,24 +275,24 @@ public partial class ProductsPage : Page
         if (LocationEditorComboBox.Items.Count > 0) LocationEditorComboBox.SelectedIndex = 0;
     }
 
-    private void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e)
+    private async void SearchBox_OnTextChanged(object sender, TextChangedEventArgs e)
     {
         if (!IsLoaded)
         {
             return;
         }
 
-        LoadProducts();
+        await LoadProductsAsync();
     }
 
-    private void FilterComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void FilterComboBox_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (!IsLoaded)
         {
             return;
         }
 
-        LoadProducts();
+        await LoadProductsAsync();
     }
 
     private static bool TryParseDecimal(string? text, out decimal value)

@@ -1,48 +1,55 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.EntityFrameworkCore;
 using SmartStockAI.App.Models;
-using SmartStockAI.App.Services;
-using SmartStockAI.Core.Entities;
+using SmartStockAI.Core.Contracts.Products;
+using SmartStockAI.Core.Contracts.Suppliers;
 
 namespace SmartStockAI.App.Views;
 
 public partial class SuppliersPage : Page
 {
+    private readonly ISupplierService _supplierService;
+    private readonly IProductService _productService;
     private readonly ObservableCollection<SupplierListItem> _suppliers = [];
     private int? _selectedSupplierId;
 
-    public SuppliersPage()
+    public SuppliersPage(ISupplierService supplierService, IProductService productService)
     {
+        _supplierService = supplierService;
+        _productService = productService;
         InitializeComponent();
         Loaded += OnLoaded;
     }
 
-    private void OnLoaded(object sender, RoutedEventArgs e)
+    private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         if (SuppliersDataGrid.ItemsSource is null)
         {
             SuppliersDataGrid.ItemsSource = _suppliers;
         }
 
-        LoadSuppliers();
+        await LoadSuppliersAsync();
         ResetEditor();
     }
 
-    private void LoadSuppliers()
+    private async Task LoadSuppliersAsync()
     {
-        using var db = AppDbContextProvider.Create();
-        var items = db.Suppliers
-            .AsNoTracking()
-            .Include(x => x.Products)
+        var suppliers = await _supplierService.GetAllAsync();
+        var products = await _productService.GetAllAsync();
+        var productCounts = products
+            .Where(x => x.SupplierId.HasValue)
+            .GroupBy(x => x.SupplierId!.Value)
+            .ToDictionary(x => x.Key, x => x.Count());
+
+        var items = suppliers
             .OrderBy(x => x.Name)
             .Select(x => new SupplierListItem
             {
                 Id = x.Id,
                 Name = x.Name,
                 ContactInfo = x.ContactInfo ?? string.Empty,
-                ProductCount = x.Products.Count
+                ProductCount = productCounts.GetValueOrDefault(x.Id)
             })
             .ToList();
 
@@ -53,15 +60,14 @@ public partial class SuppliersPage : Page
         }
     }
 
-    private void SuppliersDataGrid_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void SuppliersDataGrid_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (SuppliersDataGrid.SelectedItem is not SupplierListItem item)
         {
             return;
         }
 
-        using var db = AppDbContextProvider.Create();
-        var supplier = db.Suppliers.AsNoTracking().FirstOrDefault(x => x.Id == item.Id);
+        var supplier = await _supplierService.GetByIdAsync(item.Id);
         if (supplier is null)
         {
             return;
@@ -73,7 +79,7 @@ public partial class SuppliersPage : Page
         SupplierContactTextBox.Text = supplier.ContactInfo ?? string.Empty;
     }
 
-    private void SaveButton_OnClick(object sender, RoutedEventArgs e)
+    private async void SaveButton_OnClick(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(SupplierNameTextBox.Text))
         {
@@ -81,24 +87,36 @@ public partial class SuppliersPage : Page
             return;
         }
 
-        using var db = AppDbContextProvider.Create();
-        Supplier supplier;
-        if (_selectedSupplierId.HasValue)
+        try
         {
-            supplier = db.Suppliers.First(x => x.Id == _selectedSupplierId.Value);
+            SupplierDto? supplier;
+            if (_selectedSupplierId.HasValue)
+            {
+                supplier = await _supplierService.UpdateAsync(_selectedSupplierId.Value, new UpdateSupplierRequest
+                {
+                    Name = SupplierNameTextBox.Text.Trim(),
+                    ContactInfo = SupplierContactTextBox.Text.Trim()
+                });
+            }
+            else
+            {
+                supplier = await _supplierService.CreateAsync(new CreateSupplierRequest
+                {
+                    Name = SupplierNameTextBox.Text.Trim(),
+                    ContactInfo = SupplierContactTextBox.Text.Trim()
+                });
+            }
+
+            await LoadSuppliersAsync();
+            if (supplier is not null)
+            {
+                SelectSupplier(supplier.Id);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            supplier = new Supplier();
-            db.Suppliers.Add(supplier);
+            MessageBox.Show(ex.Message, "Поставщики", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-
-        supplier.Name = SupplierNameTextBox.Text.Trim();
-        supplier.ContactInfo = SupplierContactTextBox.Text.Trim();
-        db.SaveChanges();
-
-        LoadSuppliers();
-        SelectSupplier(supplier.Id);
     }
 
     private void SelectSupplier(int supplierId)
@@ -117,9 +135,9 @@ public partial class SuppliersPage : Page
         SuppliersDataGrid.UnselectAll();
     }
 
-    private void ReloadButton_OnClick(object sender, RoutedEventArgs e)
+    private async void ReloadButton_OnClick(object sender, RoutedEventArgs e)
     {
-        LoadSuppliers();
+        await LoadSuppliersAsync();
     }
 
     private void ResetEditor()
