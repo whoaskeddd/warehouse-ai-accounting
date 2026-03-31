@@ -6,40 +6,278 @@
       mc:Ignorable="d"
       Background="Transparent"
       Title="Товары">
-    <Grid>
-        <Border Style="{StaticResource PageContainerStyle}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+    <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
+        <Grid Margin="0,0,0,8">
+            <Border Style="{StaticResource PageContainerStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                <TextBlock Text="Товары"
-                           Style="{StaticResource PageTitleTextStyle}" />
-                <TextBlock Grid.Row="1"
-                           Margin="0,8,0,0"
-                           Text="Заготовка под список товаров и карточку товара. На шаге 2 сюда подключаются поиск, фильтры и таблица."
-                           Style="{StaticResource PageDescriptionTextStyle}" />
+                    <StackPanel>
+                        <TextBlock Text="CATALOG"
+                                   Style="{StaticResource SectionEyebrowTextStyle}" />
+                        <TextBlock Margin="0,10,0,0"
+                                   Text="Товары"
+                                   Style="{StaticResource PageTitleTextStyle}" />
+                        <TextBlock Margin="0,8,0,0"
+                                   Text="Рабочий экран каталога с поиском, фильтрами и базовой карточкой товара."
+                                   Style="{StaticResource PageDescriptionTextStyle}" />
+                    </StackPanel>
 
-                <DataGrid Grid.Row="2"
-                          Margin="0,28,0,0"
-                          AutoGenerateColumns="False"
-                          CanUserAddRows="False"
-                          HeadersVisibility="Column"
-                          Style="{StaticResource AppDataGridStyle}">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Артикул"
-                                            Binding="{Binding Code}" />
-                        <DataGridTextColumn Header="Наименование"
-                                            Binding="{Binding Name}" />
-                        <DataGridTextColumn Header="Категория"
-                                            Binding="{Binding Category}" />
-                        <DataGridTextColumn Header="Остаток"
-                                            Binding="{Binding Stock}" />
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
-        </Border>
-    </Grid>
+                    <Grid Grid.Row="1"
+                          Margin="0,28,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.5*" />
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Background="{StaticResource PanelBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="6">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Margin="14,0,10,0"
+                                           VerticalAlignment="Center"
+                                           Text="⌕"
+                                           Foreground="{StaticResource TextMutedBrush}"
+                                           FontSize="16" />
+                                <TextBox x:Name="SearchBox"
+                                         Grid.Column="1"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         Style="{StaticResource AppTextBoxStyle}"
+                                         TextChanged="SearchBox_OnTextChanged" />
+                            </Grid>
+                        </Border>
+
+                        <ComboBox x:Name="CategoryFilterComboBox"
+                                  Grid.Column="1"
+                                  Margin="14,0,0,0"
+                                  Style="{StaticResource AppComboBoxStyle}"
+                                  DisplayMemberPath="Name"
+                                  SelectedValuePath="Id"
+                                  SelectionChanged="FilterComboBox_OnSelectionChanged" />
+
+                        <ComboBox x:Name="SupplierFilterComboBox"
+                                  Grid.Column="2"
+                                  Margin="14,0,0,0"
+                                  Style="{StaticResource AppComboBoxStyle}"
+                                  DisplayMemberPath="Name"
+                                  SelectedValuePath="Id"
+                                  SelectionChanged="FilterComboBox_OnSelectionChanged" />
+
+                        <StackPanel Grid.Column="3"
+                                    Margin="16,0,0,0"
+                                    Orientation="Horizontal">
+                            <Button Content="Новый товар"
+                                    Click="NewProductButton_OnClick"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                            <Button Margin="12,0,0,0"
+                                    Content="Обновить"
+                                    Click="ReloadButton_OnClick"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Grid.Row="2"
+                          Margin="0,24,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.8*" />
+                            <ColumnDefinition Width="22" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0"
+                                Style="{StaticResource PanelCardStyle}"
+                                Margin="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="Список товаров"
+                                               VerticalAlignment="Center"
+                                               Style="{StaticResource CardCaptionTextStyle}" />
+                                    <Border Grid.Column="1"
+                                            Margin="16,0,0,0"
+                                            Style="{StaticResource PillBadgeStyle}">
+                                        <TextBlock x:Name="ProductsCountText"
+                                                   Text="0 позиций"
+                                                   Foreground="{StaticResource TextSecondaryBrush}" />
+                                    </Border>
+                                </Grid>
+
+                                <DataGrid x:Name="ProductsDataGrid"
+                                          Grid.Row="1"
+                                          Margin="0,18,0,0"
+                                          AutoGenerateColumns="False"
+                                          CanUserAddRows="False"
+                                          HeadersVisibility="Column"
+                                          IsReadOnly="True"
+                                          SelectionChanged="ProductsDataGrid_OnSelectionChanged"
+                                          Style="{StaticResource AppDataGridStyle}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Артикул"
+                                                            Binding="{Binding Sku}" />
+                                        <DataGridTextColumn Header="Наименование"
+                                                            Binding="{Binding Name}" />
+                                        <DataGridTextColumn Header="Категория"
+                                                            Binding="{Binding CategoryName}" />
+                                        <DataGridTextColumn Header="Поставщик"
+                                                            Binding="{Binding SupplierName}" />
+                                        <DataGridTextColumn Header="Остаток"
+                                                            Binding="{Binding CurrentStock}" />
+                                        <DataGridTextColumn Header="Min"
+                                                            Binding="{Binding MinStock}" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="2"
+                                Style="{StaticResource PanelCardStyle}"
+                                Margin="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <StackPanel>
+                                    <TextBlock Text="Карточка товара"
+                                               Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBlock x:Name="EditorTitleText"
+                                               Margin="0,8,0,0"
+                                               Text="Новый товар"
+                                               Style="{StaticResource PageTitleTextStyle}"
+                                               FontSize="24" />
+                                </StackPanel>
+
+                                <Grid Grid.Row="1"
+                                      Margin="0,22,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="Артикул" Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBox x:Name="SkuTextBox" Grid.Row="1" Margin="0,6,12,0" Style="{StaticResource AppTextBoxStyle}" />
+
+                                    <TextBlock Grid.Column="1" Text="Ед. изм." Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBox x:Name="UnitTextBox" Grid.Row="1" Grid.Column="1" Margin="0,6,0,0" Style="{StaticResource AppTextBoxStyle}" />
+
+                                    <TextBlock Grid.Row="2" Margin="0,16,0,0" Text="Наименование" Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBox x:Name="NameTextBox" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,6,0,0" Style="{StaticResource AppTextBoxStyle}" />
+
+                                    <TextBlock Grid.Row="4" Margin="0,16,0,0" Text="Категория" Style="{StaticResource CardCaptionTextStyle}" />
+                                    <ComboBox x:Name="CategoryEditorComboBox"
+                                              Grid.Row="5"
+                                              Margin="0,6,12,0"
+                                              Style="{StaticResource AppComboBoxStyle}"
+                                              DisplayMemberPath="Name"
+                                              SelectedValuePath="Id" />
+
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Margin="0,16,0,0" Text="Поставщик" Style="{StaticResource CardCaptionTextStyle}" />
+                                    <ComboBox x:Name="SupplierEditorComboBox"
+                                              Grid.Row="5"
+                                              Grid.Column="1"
+                                              Margin="0,6,0,0"
+                                              Style="{StaticResource AppComboBoxStyle}"
+                                              DisplayMemberPath="Name"
+                                              SelectedValuePath="Id" />
+
+                                    <TextBlock Grid.Row="6" Margin="0,16,0,0" Text="Локация" Style="{StaticResource CardCaptionTextStyle}" />
+                                    <ComboBox x:Name="LocationEditorComboBox"
+                                              Grid.Row="7"
+                                              Margin="0,6,12,0"
+                                              Style="{StaticResource AppComboBoxStyle}"
+                                              DisplayMemberPath="Name"
+                                              SelectedValuePath="Id" />
+
+                                    <StackPanel Grid.Row="6"
+                                                Grid.Column="1"
+                                                Margin="0,16,0,0">
+                                        <TextBlock Text="Остаток / Min" Style="{StaticResource CardCaptionTextStyle}" />
+                                    </StackPanel>
+                                    <Grid Grid.Row="7" Grid.Column="1" Margin="0,6,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="CurrentStockTextBox" Margin="0,0,8,0" Style="{StaticResource AppTextBoxStyle}" />
+                                        <TextBox x:Name="MinStockTextBox" Grid.Column="1" Style="{StaticResource AppTextBoxStyle}" />
+                                    </Grid>
+                                </Grid>
+
+                                <Grid Grid.Row="2"
+                                      Margin="0,24,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Margin="0,0,10,0">
+                                        <TextBlock Text="Закупочная цена"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBox x:Name="PurchasePriceTextBox"
+                                                 Margin="0,6,0,0"
+                                                 Style="{StaticResource AppTextBoxStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1"
+                                                Margin="10,0,0,0">
+                                        <TextBlock Text="Цена продажи"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBox x:Name="SalePriceTextBox"
+                                                 Margin="0,6,0,0"
+                                                 Style="{StaticResource AppTextBoxStyle}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Grid.Row="3"
+                                            Margin="0,18,0,0"
+                                            Orientation="Horizontal"
+                                            HorizontalAlignment="Right">
+                                    <Button Content="Очистить"
+                                            Click="ResetEditorButton_OnClick"
+                                            Style="{StaticResource SecondaryButtonStyle}" />
+                                    <Button Margin="12,0,0,0"
+                                            Content="Сохранить товар"
+                                            Click="SaveProductButton_OnClick"
+                                            Style="{StaticResource PrimaryButtonStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
 </Page>

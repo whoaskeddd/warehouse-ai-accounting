@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using SmartStockAI.App.Services;
 using SmartStockAI.Data.Context;
 using System.Windows;
 
@@ -11,19 +11,7 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        var configuration = new ConfigurationBuilder()
-            .SetBasePath(AppContext.BaseDirectory)
-            .AddJsonFile("appsettings.json", optional: false)
-            .Build();
-
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-            ?? "Data Source=smartstockai.db";
-
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite(connectionString)
-            .Options;
-
-        using var dbContext = new AppDbContext(options);
+        using var dbContext = AppDbContextProvider.Create();
         dbContext.Database.Migrate();
     }
 }
