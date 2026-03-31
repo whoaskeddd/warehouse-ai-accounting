@@ -1,7 +1,4 @@
-.vs/
-.dotnet/
 bin/
 obj/
-*.db
-*.db-shm
-*.db-wal
+.vs/
+.dotnet/

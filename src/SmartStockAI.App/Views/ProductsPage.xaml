@@ -1,0 +1,45 @@
+<Page x:Class="SmartStockAI.App.Views.ProductsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Background="Transparent"
+      Title="Товары">
+    <Grid>
+        <Border Style="{StaticResource PageContainerStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Товары"
+                           Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Grid.Row="1"
+                           Margin="0,8,0,0"
+                           Text="Заготовка под список товаров и карточку товара. На шаге 2 сюда подключаются поиск, фильтры и таблица."
+                           Style="{StaticResource PageDescriptionTextStyle}" />
+
+                <DataGrid Grid.Row="2"
+                          Margin="0,28,0,0"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          HeadersVisibility="Column"
+                          Style="{StaticResource AppDataGridStyle}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Артикул"
+                                            Binding="{Binding Code}" />
+                        <DataGridTextColumn Header="Наименование"
+                                            Binding="{Binding Name}" />
+                        <DataGridTextColumn Header="Категория"
+                                            Binding="{Binding Category}" />
+                        <DataGridTextColumn Header="Остаток"
+                                            Binding="{Binding Stock}" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>

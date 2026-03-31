@@ -5,45 +5,63 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="SmartStock AI"
-        Height="600"
-        Width="1000"
-        MinHeight="500"
-        MinWidth="900">
+        Width="1360"
+        Height="820"
+        MinWidth="1100"
+        MinHeight="700"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource AppBackgroundBrush}">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220" />
+            <ColumnDefinition Width="280" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Border Background="#1F2937">
-            <StackPanel Margin="16">
-                <TextBlock Margin="0,0,0,20"
-                           FontSize="22"
-                           FontWeight="SemiBold"
-                           Foreground="White"
-                           Text="SmartStock AI" />
-                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Товары" />
-                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Категории" />
-                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Поставщики" />
-                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Локации" />
-                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Приход" />
-                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Расход" />
-                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Инвентаризация" />
-                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Отчеты" />
-                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Дашборд" />
-            </StackPanel>
+        <Border Background="{StaticResource SidebarBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,1,0">
+            <DockPanel Margin="20">
+                <StackPanel DockPanel.Dock="Top"
+                            Margin="0,0,0,24">
+                    <TextBlock Text="SmartStock AI"
+                               Style="{StaticResource AppTitleTextStyle}" />
+                    <TextBlock Margin="0,6,0,0"
+                               Text="Шаг 1: shell и базовая навигация"
+                               Style="{StaticResource AppSubtitleTextStyle}" />
+                </StackPanel>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ListBox x:Name="NavigationList"
+                             SelectionChanged="NavigationList_OnSelectionChanged"
+                             Style="{StaticResource NavigationListStyle}">
+                        <ListBoxItem Tag="Dashboard"
+                                     Content="Дашборд"
+                                     IsSelected="True" />
+                        <ListBoxItem Tag="Products"
+                                     Content="Товары" />
+                        <ListBoxItem Tag="Categories"
+                                     Content="Категории" />
+                        <ListBoxItem Tag="Suppliers"
+                                     Content="Поставщики" />
+                        <ListBoxItem Tag="Locations"
+                                     Content="Локации" />
+                        <ListBoxItem Tag="Inbound"
+                                     Content="Приход" />
+                        <ListBoxItem Tag="Outbound"
+                                     Content="Расход" />
+                        <ListBoxItem Tag="Inventory"
+                                     Content="Инвентаризация" />
+                        <ListBoxItem Tag="Reports"
+                                     Content="Отчеты" />
+                    </ListBox>
+                </ScrollViewer>
+            </DockPanel>
         </Border>
 
-        <Grid Grid.Column="1" Margin="24">
-            <StackPanel>
-                <TextBlock FontSize="28"
-                           FontWeight="SemiBold"
-                           Text="Каркас шага 1 готов" />
-                <TextBlock Margin="0,12,0,0"
-                           FontSize="16"
-                           Foreground="#4B5563"
-                           Text="Подключена база данных, описаны базовые сущности и подготовлены миграции для следующего шага." />
-            </StackPanel>
+        <Grid Grid.Column="1"
+              Margin="24">
+            <Frame x:Name="MainFrame"
+                   NavigationUIVisibility="Hidden" />
         </Grid>
     </Grid>
 </Window>

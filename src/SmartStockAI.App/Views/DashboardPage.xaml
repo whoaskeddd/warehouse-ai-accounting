@@ -1,0 +1,59 @@
+<Page x:Class="SmartStockAI.App.Views.DashboardPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Background="Transparent"
+      Title="Дашборд">
+    <Grid>
+        <Border Style="{StaticResource PageContainerStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Дашборд"
+                           Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Grid.Row="1"
+                           Margin="0,8,0,0"
+                           Text="Пустой экран для стартового каркаса. На шаге 6 сюда добавятся критические остатки, дефицит и последние движения."
+                           Style="{StaticResource PageDescriptionTextStyle}" />
+
+                <UniformGrid Grid.Row="2"
+                             Margin="0,28,0,0"
+                             Columns="3">
+                    <Border Style="{StaticResource StatCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Критичные остатки"
+                                       Style="{StaticResource CardCaptionTextStyle}" />
+                            <TextBlock Margin="0,8,0,0"
+                                       Text="0"
+                                       Style="{StaticResource CardValueTextStyle}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource StatCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Ожидаемые закупки"
+                                       Style="{StaticResource CardCaptionTextStyle}" />
+                            <TextBlock Margin="0,8,0,0"
+                                       Text="0"
+                                       Style="{StaticResource CardValueTextStyle}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource StatCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Открытые документы"
+                                       Style="{StaticResource CardCaptionTextStyle}" />
+                            <TextBlock Margin="0,8,0,0"
+                                       Text="0"
+                                       Style="{StaticResource CardValueTextStyle}" />
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</Page>
