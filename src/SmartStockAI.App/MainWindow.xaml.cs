@@ -27,6 +27,6 @@ public partial class MainWindow : Window
             return;
         }
 
-        _navigationService.Navigate(key);
+        
     }
 }
