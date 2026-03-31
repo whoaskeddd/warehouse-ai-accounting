@@ -52,9 +52,9 @@
                                           SelectionChanged="LocationsDataGrid_OnSelectionChanged"
                                           Style="{StaticResource AppDataGridStyle}">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Название" Binding="{Binding Name}" />
-                                        <DataGridTextColumn Header="Родитель" Binding="{Binding ParentName}" />
-                                        <DataGridTextColumn Header="Товаров" Binding="{Binding ProductCount}" />
+                                        <DataGridTextColumn Header="Название" Width="2*" ElementStyle="{StaticResource CenteredDataGridTextStyle}" Binding="{Binding Name}" />
+                                        <DataGridTextColumn Header="Родитель" Width="1.4*" ElementStyle="{StaticResource CenteredDataGridTextStyle}" Binding="{Binding ParentName}" />
+                                        <DataGridTextColumn Header="Товаров" Width="120" ElementStyle="{StaticResource CenteredDataGridTextStyle}" Binding="{Binding ProductCount}" />
                                     </DataGrid.Columns>
                                 </DataGrid>
                             </Grid>

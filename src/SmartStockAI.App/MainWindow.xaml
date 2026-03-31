@@ -47,8 +47,7 @@
                                Style="{StaticResource AppTitleTextStyle}" />
                     <TextBlock Margin="0,6,0,0"
                                MaxWidth="228"
-                               Text="Чистый интерфейс для учета, аналитики и закупок"
-                               Style="{StaticResource AppSubtitleTextStyle}" />
+                               Style="{StaticResource AppSubtitleTextStyle}" ><Run Language="ru-ru" Text="Абрамов Смелов "/></TextBlock>
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom"
