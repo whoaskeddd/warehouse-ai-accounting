@@ -1,0 +1,49 @@
+<Window x:Class="SmartStockAI.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="SmartStock AI"
+        Height="600"
+        Width="1000"
+        MinHeight="500"
+        MinWidth="900">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Background="#1F2937">
+            <StackPanel Margin="16">
+                <TextBlock Margin="0,0,0,20"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           Foreground="White"
+                           Text="SmartStock AI" />
+                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Товары" />
+                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Категории" />
+                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Поставщики" />
+                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Локации" />
+                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Приход" />
+                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Расход" />
+                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Инвентаризация" />
+                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Отчеты" />
+                <TextBlock Margin="0,0,0,10" Foreground="#D1D5DB" Text="Дашборд" />
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Column="1" Margin="24">
+            <StackPanel>
+                <TextBlock FontSize="28"
+                           FontWeight="SemiBold"
+                           Text="Каркас шага 1 готов" />
+                <TextBlock Margin="0,12,0,0"
+                           FontSize="16"
+                           Foreground="#4B5563"
+                           Text="Подключена база данных, описаны базовые сущности и подготовлены миграции для следующего шага." />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>
