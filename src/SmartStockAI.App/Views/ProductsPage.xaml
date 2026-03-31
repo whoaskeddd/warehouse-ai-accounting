@@ -39,7 +39,7 @@
                         <Border Background="{StaticResource PanelBrush}"
                                 BorderBrush="{StaticResource BorderBrush}"
                                 BorderThickness="1"
-                                CornerRadius="18"
+                                CornerRadius="12"
                                 Padding="6">
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -55,6 +55,7 @@
                                          Grid.Column="1"
                                          BorderThickness="0"
                                          Background="Transparent"
+                                         Style="{StaticResource AppTextBoxStyle}"
                                          TextChanged="SearchBox_OnTextChanged" />
                             </Grid>
                         </Border>
@@ -62,6 +63,7 @@
                         <ComboBox x:Name="CategoryFilterComboBox"
                                   Grid.Column="1"
                                   Margin="14,0,0,0"
+                                  Style="{StaticResource AppComboBoxStyle}"
                                   DisplayMemberPath="Name"
                                   SelectedValuePath="Id"
                                   SelectionChanged="FilterComboBox_OnSelectionChanged" />
@@ -69,6 +71,7 @@
                         <ComboBox x:Name="SupplierFilterComboBox"
                                   Grid.Column="2"
                                   Margin="14,0,0,0"
+                                  Style="{StaticResource AppComboBoxStyle}"
                                   DisplayMemberPath="Name"
                                   SelectedValuePath="Id"
                                   SelectionChanged="FilterComboBox_OnSelectionChanged" />
@@ -103,16 +106,23 @@
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
 
-                                <DockPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
                                     <TextBlock Text="Список товаров"
+                                               VerticalAlignment="Center"
                                                Style="{StaticResource CardCaptionTextStyle}" />
-                                    <Border DockPanel.Dock="Right"
+                                    <Border Grid.Column="1"
+                                            Margin="16,0,0,0"
                                             Style="{StaticResource PillBadgeStyle}">
                                         <TextBlock x:Name="ProductsCountText"
                                                    Text="0 позиций"
                                                    Foreground="{StaticResource TextSecondaryBrush}" />
                                     </Border>
-                                </DockPanel>
+                                </Grid>
 
                                 <DataGrid x:Name="ProductsDataGrid"
                                           Grid.Row="1"
@@ -180,18 +190,19 @@
                                     </Grid.ColumnDefinitions>
 
                                     <TextBlock Text="Артикул" Style="{StaticResource CardCaptionTextStyle}" />
-                                    <TextBox x:Name="SkuTextBox" Grid.Row="1" Margin="0,6,12,0" />
+                                    <TextBox x:Name="SkuTextBox" Grid.Row="1" Margin="0,6,12,0" Style="{StaticResource AppTextBoxStyle}" />
 
                                     <TextBlock Grid.Column="1" Text="Ед. изм." Style="{StaticResource CardCaptionTextStyle}" />
-                                    <TextBox x:Name="UnitTextBox" Grid.Row="1" Grid.Column="1" Margin="0,6,0,0" />
+                                    <TextBox x:Name="UnitTextBox" Grid.Row="1" Grid.Column="1" Margin="0,6,0,0" Style="{StaticResource AppTextBoxStyle}" />
 
                                     <TextBlock Grid.Row="2" Margin="0,16,0,0" Text="Наименование" Style="{StaticResource CardCaptionTextStyle}" />
-                                    <TextBox x:Name="NameTextBox" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,6,0,0" />
+                                    <TextBox x:Name="NameTextBox" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,6,0,0" Style="{StaticResource AppTextBoxStyle}" />
 
                                     <TextBlock Grid.Row="4" Margin="0,16,0,0" Text="Категория" Style="{StaticResource CardCaptionTextStyle}" />
                                     <ComboBox x:Name="CategoryEditorComboBox"
                                               Grid.Row="5"
                                               Margin="0,6,12,0"
+                                              Style="{StaticResource AppComboBoxStyle}"
                                               DisplayMemberPath="Name"
                                               SelectedValuePath="Id" />
 
@@ -200,6 +211,7 @@
                                               Grid.Row="5"
                                               Grid.Column="1"
                                               Margin="0,6,0,0"
+                                              Style="{StaticResource AppComboBoxStyle}"
                                               DisplayMemberPath="Name"
                                               SelectedValuePath="Id" />
 
@@ -207,6 +219,7 @@
                                     <ComboBox x:Name="LocationEditorComboBox"
                                               Grid.Row="7"
                                               Margin="0,6,12,0"
+                                              Style="{StaticResource AppComboBoxStyle}"
                                               DisplayMemberPath="Name"
                                               SelectedValuePath="Id" />
 
@@ -220,8 +233,8 @@
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="*" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBox x:Name="CurrentStockTextBox" Margin="0,0,8,0" />
-                                        <TextBox x:Name="MinStockTextBox" Grid.Column="1" />
+                                        <TextBox x:Name="CurrentStockTextBox" Margin="0,0,8,0" Style="{StaticResource AppTextBoxStyle}" />
+                                        <TextBox x:Name="MinStockTextBox" Grid.Column="1" Style="{StaticResource AppTextBoxStyle}" />
                                     </Grid>
                                 </Grid>
 
@@ -235,14 +248,16 @@
                                         <TextBlock Text="Закупочная цена"
                                                    Style="{StaticResource CardCaptionTextStyle}" />
                                         <TextBox x:Name="PurchasePriceTextBox"
-                                                 Margin="0,6,0,0" />
+                                                 Margin="0,6,0,0"
+                                                 Style="{StaticResource AppTextBoxStyle}" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1"
                                                 Margin="10,0,0,0">
                                         <TextBlock Text="Цена продажи"
                                                    Style="{StaticResource CardCaptionTextStyle}" />
                                         <TextBox x:Name="SalePriceTextBox"
-                                                 Margin="0,6,0,0" />
+                                                 Margin="0,6,0,0"
+                                                 Style="{StaticResource AppTextBoxStyle}" />
                                     </StackPanel>
                                 </Grid>
 

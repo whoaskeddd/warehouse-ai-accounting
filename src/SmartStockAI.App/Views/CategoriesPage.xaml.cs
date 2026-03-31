@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +40,7 @@ public partial class CategoriesPage : Page
             .Select(x => new LookupItem { Id = x.Id, Name = x.Name })
             .ToList();
 
-        ParentCategoryComboBox.ItemsSource = [new LookupItem { Id = null, Name = "Корневая категория" }, .. lookup];
+        ParentCategoryComboBox.ItemsSource = CreateLookupOptions("Корневая категория", lookup);
         if (!_selectedCategoryId.HasValue)
         {
             ParentCategoryComboBox.SelectedIndex = 0;
@@ -144,5 +145,10 @@ public partial class CategoriesPage : Page
         {
             ParentCategoryComboBox.SelectedIndex = 0;
         }
+    }
+
+    private static List<LookupItem> CreateLookupOptions(string emptyTitle, IEnumerable<LookupItem> items)
+    {
+        return [new LookupItem { Id = null, Name = emptyTitle }, .. items];
     }
 }

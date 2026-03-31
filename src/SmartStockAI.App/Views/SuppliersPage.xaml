@@ -34,10 +34,14 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
-                                <DockPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
                                     <TextBlock Text="Список поставщиков" Style="{StaticResource CardCaptionTextStyle}" />
-                                    <Button DockPanel.Dock="Right" Content="Обновить" Click="ReloadButton_OnClick" Style="{StaticResource SecondaryButtonStyle}" />
-                                </DockPanel>
+                                    <Button Grid.Column="1" Content="Обновить" Click="ReloadButton_OnClick" Style="{StaticResource SecondaryButtonStyle}" />
+                                </Grid>
                                 <DataGrid x:Name="SuppliersDataGrid"
                                           Grid.Row="1"
                                           Margin="0,18,0,0"
@@ -78,9 +82,9 @@
                                     </Grid.RowDefinitions>
 
                                     <TextBlock Text="Название" Style="{StaticResource CardCaptionTextStyle}" />
-                                    <TextBox x:Name="SupplierNameTextBox" Grid.Row="1" Margin="0,6,0,0" />
+                                    <TextBox x:Name="SupplierNameTextBox" Grid.Row="1" Margin="0,6,0,0" Style="{StaticResource AppTextBoxStyle}" />
                                     <TextBlock Grid.Row="2" Margin="0,16,0,0" Text="Контактная информация" Style="{StaticResource CardCaptionTextStyle}" />
-                                    <TextBox x:Name="SupplierContactTextBox" Grid.Row="3" Margin="0,6,0,0" Height="90" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" />
+                                    <TextBox x:Name="SupplierContactTextBox" Grid.Row="3" Margin="0,6,0,0" Height="90" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" Style="{StaticResource AppTextBoxStyle}" />
                                 </Grid>
 
                                 <StackPanel Grid.Row="2"

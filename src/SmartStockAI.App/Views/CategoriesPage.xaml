@@ -34,10 +34,14 @@
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
                                 </Grid.RowDefinitions>
-                                <DockPanel>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
                                     <TextBlock Text="Список категорий" Style="{StaticResource CardCaptionTextStyle}" />
-                                    <Button DockPanel.Dock="Right" Content="Обновить" Click="ReloadButton_OnClick" Style="{StaticResource SecondaryButtonStyle}" />
-                                </DockPanel>
+                                    <Button Grid.Column="1" Content="Обновить" Click="ReloadButton_OnClick" Style="{StaticResource SecondaryButtonStyle}" />
+                                </Grid>
                                 <DataGrid x:Name="CategoriesDataGrid"
                                           Grid.Row="1"
                                           Margin="0,18,0,0"
@@ -71,12 +75,13 @@
                                 </StackPanel>
 
                                 <TextBlock Grid.Row="1" Margin="0,22,0,0" Text="Название" Style="{StaticResource CardCaptionTextStyle}" />
-                                <TextBox x:Name="CategoryNameTextBox" Grid.Row="1" Margin="0,48,0,0" />
+                                <TextBox x:Name="CategoryNameTextBox" Grid.Row="1" Margin="0,48,0,0" Style="{StaticResource AppTextBoxStyle}" />
 
                                 <StackPanel Grid.Row="2" Margin="0,20,0,0">
                                     <TextBlock Text="Родительская категория" Style="{StaticResource CardCaptionTextStyle}" />
                                     <ComboBox x:Name="ParentCategoryComboBox"
                                               Margin="0,6,0,0"
+                                              Style="{StaticResource AppComboBoxStyle}"
                                               DisplayMemberPath="Name"
                                               SelectedValuePath="Id" />
                                 </StackPanel>
