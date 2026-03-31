@@ -6,18 +6,98 @@
       mc:Ignorable="d"
       Background="Transparent"
       Title="Локации">
-    <Grid>
-        <Border Style="{StaticResource PageContainerStyle}">
-            <StackPanel>
-                <TextBlock Text="Локации"
-                           Style="{StaticResource PageTitleTextStyle}" />
-                <TextBlock Margin="0,8,0,0"
-                           Text="Заготовка под дерево мест хранения. В базовой версии хватит иерархии без сложной маршрутизации."
-                           Style="{StaticResource PageDescriptionTextStyle}" />
-                <TextBlock Margin="0,28,0,0"
-                           Text="Пустой экран локаций."
-                           Style="{StaticResource PlaceholderTextStyle}" />
-            </StackPanel>
-        </Border>
-    </Grid>
+    <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
+        <Grid Margin="0,0,0,8">
+            <Border Style="{StaticResource PageContainerStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="STORAGE MAP" Style="{StaticResource SectionEyebrowTextStyle}" />
+                        <TextBlock Margin="0,10,0,0" Text="Локации" Style="{StaticResource PageTitleTextStyle}" />
+                        <TextBlock Margin="0,8,0,0" Text="Базовая иерархия мест хранения: список, родительская локация и быстрый редактор." Style="{StaticResource PageDescriptionTextStyle}" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="1" Margin="0,26,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.3*" />
+                            <ColumnDefinition Width="22" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Style="{StaticResource PanelCardStyle}" Margin="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Список локаций" Style="{StaticResource CardCaptionTextStyle}" />
+                                    <Button Grid.Column="1" Content="Обновить" Click="ReloadButton_OnClick" Style="{StaticResource SecondaryButtonStyle}" />
+                                </Grid>
+                                <DataGrid x:Name="LocationsDataGrid"
+                                          Grid.Row="1"
+                                          Margin="0,18,0,0"
+                                          AutoGenerateColumns="False"
+                                          CanUserAddRows="False"
+                                          HeadersVisibility="Column"
+                                          IsReadOnly="True"
+                                          SelectionChanged="LocationsDataGrid_OnSelectionChanged"
+                                          Style="{StaticResource AppDataGridStyle}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Название" Binding="{Binding Name}" />
+                                        <DataGridTextColumn Header="Родитель" Binding="{Binding ParentName}" />
+                                        <DataGridTextColumn Header="Товаров" Binding="{Binding ProductCount}" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="2" Style="{StaticResource PanelCardStyle}" Margin="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <StackPanel>
+                                    <TextBlock Text="Редактор локации" Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBlock x:Name="LocationEditorTitleText" Margin="0,8,0,0" Text="Новая локация" Style="{StaticResource PageTitleTextStyle}" FontSize="24" />
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="1" Margin="0,22,0,0" Text="Название" Style="{StaticResource CardCaptionTextStyle}" />
+                                <TextBox x:Name="LocationNameTextBox" Grid.Row="1" Margin="0,48,0,0" Style="{StaticResource AppTextBoxStyle}" />
+
+                                <StackPanel Grid.Row="2" Margin="0,20,0,0">
+                                    <TextBlock Text="Родительская локация" Style="{StaticResource CardCaptionTextStyle}" />
+                                    <ComboBox x:Name="ParentLocationComboBox"
+                                              Margin="0,6,0,0"
+                                              Style="{StaticResource AppComboBoxStyle}"
+                                              DisplayMemberPath="Name"
+                                              SelectedValuePath="Id" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Row="3"
+                                            Margin="0,26,0,0"
+                                            Orientation="Horizontal"
+                                            HorizontalAlignment="Right">
+                                    <Button Content="Очистить" Click="ResetButton_OnClick" Style="{StaticResource SecondaryButtonStyle}" />
+                                    <Button Margin="12,0,0,0" Content="Сохранить" Click="SaveButton_OnClick" Style="{StaticResource PrimaryButtonStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
 </Page>

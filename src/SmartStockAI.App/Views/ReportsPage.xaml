@@ -6,18 +6,31 @@
       mc:Ignorable="d"
       Background="Transparent"
       Title="Отчеты">
-    <Grid>
+    <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
+    <Grid Margin="0,0,0,8">
         <Border Style="{StaticResource PageContainerStyle}">
             <StackPanel>
-                <TextBlock Text="Отчеты"
+                <TextBlock Text="INSIGHTS"
+                           Style="{StaticResource SectionEyebrowTextStyle}" />
+                <TextBlock Margin="0,10,0,0"
+                           Text="Отчеты"
                            Style="{StaticResource PageTitleTextStyle}" />
                 <TextBlock Margin="0,8,0,0"
-                           Text="Заготовка под экран отчетов. На шаге 5 сюда подключатся preview, фильтры и экспорт."
+                           Text="Визуально лёгкий центр аналитики с акцентом на табличный preview и понятный экспорт."
                            Style="{StaticResource PageDescriptionTextStyle}" />
+                <StackPanel Margin="0,18,0,0"
+                            Orientation="Horizontal">
+                    <Button Content="Открыть отчеты"
+                            Style="{StaticResource PrimaryButtonStyle}" />
+                    <Button Margin="12,0,0,0"
+                            Content="Экспорт"
+                            Style="{StaticResource SecondaryButtonStyle}" />
+                </StackPanel>
                 <TextBlock Margin="0,28,0,0"
                            Text="Пустой экран отчетов."
                            Style="{StaticResource PlaceholderTextStyle}" />
             </StackPanel>
         </Border>
     </Grid>
+    </ScrollViewer>
 </Page>

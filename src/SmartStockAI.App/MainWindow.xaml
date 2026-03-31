@@ -11,56 +11,107 @@
         MinHeight="700"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource AppBackgroundBrush}">
-    <Grid>
+    <Grid Background="{StaticResource CanvasGradientBrush}">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="280" />
+            <ColumnDefinition Width="300" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Border Background="{StaticResource SidebarBrush}"
-                BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="0,0,1,0">
-            <DockPanel Margin="20">
+        <Ellipse HorizontalAlignment="Right"
+                 VerticalAlignment="Top"
+                 Width="420"
+                 Height="420"
+                 Margin="0,-160,-120,0"
+                 Fill="#26C4B5FD"
+                 IsHitTestVisible="False" />
+        <Ellipse HorizontalAlignment="Left"
+                 VerticalAlignment="Bottom"
+                 Width="380"
+                 Height="380"
+                 Margin="-120,0,0,-170"
+                 Fill="#20B7E4D8"
+                 IsHitTestVisible="False" />
+
+        <Border Margin="20"
+                Background="{StaticResource SidebarBrush}"
+                BorderBrush="{StaticResource SidebarBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="28"
+                Effect="{StaticResource SoftShadowEffect}">
+            <DockPanel Margin="22">
                 <StackPanel DockPanel.Dock="Top"
-                            Margin="0,0,0,24">
+                            Margin="0,0,0,28">
+                    <TextBlock Text="WAREHOUSE AI"
+                               Style="{StaticResource SectionEyebrowTextStyle}" />
                     <TextBlock Text="SmartStock AI"
                                Style="{StaticResource AppTitleTextStyle}" />
                     <TextBlock Margin="0,6,0,0"
-                               Text="Шаг 1: shell и базовая навигация"
+                               MaxWidth="228"
+                               Text="Чистый интерфейс для учета, аналитики и закупок"
                                Style="{StaticResource AppSubtitleTextStyle}" />
                 </StackPanel>
 
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <ListBox x:Name="NavigationList"
-                             SelectionChanged="NavigationList_OnSelectionChanged"
-                             Style="{StaticResource NavigationListStyle}">
-                        <ListBoxItem Tag="Dashboard"
-                                     Content="Дашборд"
-                                     IsSelected="True" />
-                        <ListBoxItem Tag="Products"
-                                     Content="Товары" />
-                        <ListBoxItem Tag="Categories"
-                                     Content="Категории" />
-                        <ListBoxItem Tag="Suppliers"
-                                     Content="Поставщики" />
-                        <ListBoxItem Tag="Locations"
-                                     Content="Локации" />
-                        <ListBoxItem Tag="Inbound"
-                                     Content="Приход" />
-                        <ListBoxItem Tag="Outbound"
-                                     Content="Расход" />
-                        <ListBoxItem Tag="Inventory"
-                                     Content="Инвентаризация" />
-                        <ListBoxItem Tag="Reports"
-                                     Content="Отчеты" />
-                    </ListBox>
-                </ScrollViewer>
+                <StackPanel DockPanel.Dock="Bottom"
+                            Margin="0,28,0,0">
+                    <Border Style="{StaticResource PanelCardStyle}"
+                            Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Быстрое действие"
+                                       Style="{StaticResource CardCaptionTextStyle}" />
+                            <TextBlock Margin="0,8,0,0"
+                                       Text="Добавить товар"
+                                       Style="{StaticResource PageTitleTextStyle}"
+                                       FontSize="20"
+                                       MaxWidth="190" />
+                            <TextBlock Margin="0,8,0,0"
+                                       MaxWidth="210"
+                                       Text="Начинай с наполнения каталога, затем переходи к документам движения."
+                                       Style="{StaticResource PageDescriptionTextStyle}" />
+                            <Button Margin="0,18,0,0"
+                                    Content="Открыть товары"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource PillBadgeStyle}"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="UI Workspace"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   FontWeight="SemiBold" />
+                    </Border>
+                </StackPanel>
+
+                <ListBox x:Name="NavigationList"
+                         SelectionChanged="NavigationList_OnSelectionChanged"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         Style="{StaticResource NavigationListStyle}">
+                    <ListBoxItem Tag="Dashboard"
+                                 Content="Дашборд" />
+                    <ListBoxItem Tag="Products"
+                                 Content="Товары" />
+                    <ListBoxItem Tag="Categories"
+                                 Content="Категории" />
+                    <ListBoxItem Tag="Suppliers"
+                                 Content="Поставщики" />
+                    <ListBoxItem Tag="Locations"
+                                 Content="Локации" />
+                    <ListBoxItem Tag="Inbound"
+                                 Content="Приход" />
+                    <ListBoxItem Tag="Outbound"
+                                 Content="Расход" />
+                    <ListBoxItem Tag="Inventory"
+                                 Content="Инвентаризация" />
+                    <ListBoxItem Tag="Reports"
+                                 Content="Отчеты" />
+                </ListBox>
             </DockPanel>
         </Border>
 
         <Grid Grid.Column="1"
-              Margin="24">
+              Margin="4,20,20,20">
             <Frame x:Name="MainFrame"
+                   Background="Transparent"
                    NavigationUIVisibility="Hidden" />
         </Grid>
     </Grid>

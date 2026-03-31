@@ -2,3 +2,6 @@ bin/
 obj/
 .vs/
 .dotnet/
+*.slnx
+build-diag.log
+smartstockai.db
