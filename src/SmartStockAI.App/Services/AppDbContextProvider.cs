@@ -16,6 +16,8 @@ public static class AppDbContextProvider
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? "Data Source=smartstockai.db";
 
+        connectionString = SqliteConnectionStringResolver.Resolve(connectionString);
+
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite(connectionString)
             .Options;

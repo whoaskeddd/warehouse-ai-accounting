@@ -31,8 +31,8 @@ public partial class App : Application
             })
             .ConfigureServices((context, services) =>
             {
-                var connectionString = context.Configuration.GetConnectionString("DefaultConnection")
-                    ?? "Data Source=smartstockai.db";
+                var connectionString = SqliteConnectionStringResolver.Resolve(
+                    context.Configuration.GetConnectionString("DefaultConnection"));
 
                 services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
                 services.AddScoped<IProductService, ProductService>();
