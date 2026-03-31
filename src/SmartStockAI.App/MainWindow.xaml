@@ -72,13 +72,6 @@
                                     Style="{StaticResource PrimaryButtonStyle}" />
                         </StackPanel>
                     </Border>
-
-                    <Border Style="{StaticResource PillBadgeStyle}"
-                            HorizontalAlignment="Left">
-                        <TextBlock Text="UI Workspace"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   FontWeight="SemiBold" />
-                    </Border>
                 </StackPanel>
 
                 <ListBox x:Name="NavigationList"

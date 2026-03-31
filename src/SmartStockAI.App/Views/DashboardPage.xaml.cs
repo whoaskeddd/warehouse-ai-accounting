@@ -8,4 +8,9 @@ public partial class DashboardPage : Page
     {
         InitializeComponent();
     }
+
+    private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+
+    }
 }

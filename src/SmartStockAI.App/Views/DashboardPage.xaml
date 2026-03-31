@@ -25,7 +25,7 @@
                            Style="{StaticResource PageTitleTextStyle}" />
                 <TextBlock Grid.Row="2"
                            Margin="0,8,0,0"
-                           Text="Светлая рабочая панель в духе OpenAI и Apple: крупные акценты, спокойные поверхности и минимум визуального шума."
+                           Text="Светлая рабочая панель крупные акценты, спокойные поверхности и минимум визуального шума."
                            Style="{StaticResource PageDescriptionTextStyle}" />
 
                 <Grid Grid.Row="3"
@@ -45,18 +45,8 @@
                         </StackPanel>
                         <StackPanel DockPanel.Dock="Right"
                                     Orientation="Horizontal"
-                                    HorizontalAlignment="Right">
-                            <Border Style="{StaticResource PillBadgeStyle}">
-                                <TextBlock Text="Auto-sync UI"
-                                           Foreground="{StaticResource TextSecondaryBrush}" />
-                            </Border>
-                            <Border Margin="10,0,0,0"
-                                    Style="{StaticResource PillBadgeStyle}">
-                                <TextBlock Text="Ready for Step 2"
-                                           Foreground="{StaticResource SuccessBrush}" />
-                            </Border>
-                        </StackPanel>
-                    </DockPanel>
+                                    HorizontalAlignment="Right"/>
+                        </DockPanel>
 
                     <Grid Grid.Row="1"
                           Margin="0,24,0,0">
@@ -147,7 +137,7 @@
                                            Style="{StaticResource PageDescriptionTextStyle}" />
                                 <Button Margin="0,18,0,0"
                                         Content="Перейти к товарам"
-                                        Style="{StaticResource PrimaryButtonStyle}" />
+                                        Style="{StaticResource PrimaryButtonStyle}" Click="Button_Click" />
                             </StackPanel>
                         </Border>
                     </Grid>

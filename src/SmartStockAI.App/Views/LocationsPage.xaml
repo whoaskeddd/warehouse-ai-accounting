@@ -39,7 +39,7 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="Список локаций" Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBlock Text="Список локаций" Style="{StaticResource CardCaptionTextStyle}" Grid.ColumnSpan="2" Margin="0,14,103,-14" />
                                     <Button Grid.Column="1" Content="Обновить" Click="ReloadButton_OnClick" Style="{StaticResource SecondaryButtonStyle}" />
                                 </Grid>
                                 <DataGrid x:Name="LocationsDataGrid"
