@@ -35,8 +35,7 @@
                              SelectionChanged="NavigationList_OnSelectionChanged"
                              Style="{StaticResource NavigationListStyle}">
                         <ListBoxItem Tag="Dashboard"
-                                     Content="Дашборд"
-                                     IsSelected="True" />
+                                     Content="Дашборд" />
                         <ListBoxItem Tag="Products"
                                      Content="Товары" />
                         <ListBoxItem Tag="Categories"
