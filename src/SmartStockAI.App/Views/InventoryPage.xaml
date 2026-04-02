@@ -10,15 +10,14 @@
     <Grid Margin="0,0,0,8">
         <Border Style="{StaticResource PageContainerStyle}">
             <StackPanel>
-                <TextBlock Text="CONTROL"
-                           Style="{StaticResource SectionEyebrowTextStyle}" />
-                <TextBlock Margin="0,10,0,0"
+                    <TextBlock
+                           Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="УПРАВЛЕНИЕ"/></TextBlock>
+                    <TextBlock Margin="0,10,0,0"
                            Text="Инвентаризация"
                            Style="{StaticResource PageTitleTextStyle}" />
-                <TextBlock Margin="0,8,0,0"
-                           Text="Фокус на спокойной пошаговой проверке остатков, расхождениях и завершении без перегрузки деталями."
-                           Style="{StaticResource PageDescriptionTextStyle}" />
-                <Button Margin="0,18,0,0"
+                    <TextBlock Margin="0,8,0,0"
+                           Style="{StaticResource PageDescriptionTextStyle}" ><Run Language="ru-ru" Text="Проверк"/><Run Text=" остатков, расхождениях и завершении"/><Run Language="ru-ru" Text="."/></TextBlock>
+                    <Button Margin="0,18,0,0"
                         HorizontalAlignment="Left"
                         Content="Начать инвентаризацию"
                         Style="{StaticResource SecondaryButtonStyle}" />

@@ -386,7 +386,7 @@ public partial class InboundPage : Page, INotifyPropertyChanged
         _isRefreshingSelection = true;
         SelectedDocument = null;
         _isRefreshingSelection = false;
-        DocumentNumber = $"IN-{DateTime.Now:HHmmss}";
+        DocumentNumber = CreateDefaultDocumentNumber("IN");
         DocumentStatus = "Черновик";
         DocumentComment = string.Empty;
         SelectedSupplier = Suppliers.FirstOrDefault();
@@ -449,7 +449,7 @@ public partial class InboundPage : Page, INotifyPropertyChanged
 
         var created = await _stockService.CreateDocumentAsync(new CreateStockDocumentRequest
         {
-            Number = string.IsNullOrWhiteSpace(DocumentNumber) ? $"IN-{DateTime.Now:HHmmss}" : DocumentNumber.Trim(),
+            Number = string.IsNullOrWhiteSpace(DocumentNumber) ? CreateDefaultDocumentNumber("IN") : DocumentNumber.Trim(),
             Type = StockDocumentType.Receipt,
             SupplierId = SelectedSupplier?.Id,
             Comment = DocumentComment,
@@ -562,6 +562,11 @@ public partial class InboundPage : Page, INotifyPropertyChanged
     {
         return decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out value)
             || decimal.TryParse(text, NumberStyles.Any, CultureInfo.GetCultureInfo("ru-RU"), out value);
+    }
+
+    private static string CreateDefaultDocumentNumber(string prefix)
+    {
+        return $"{prefix}-{DateTime.Now:yyyyMMdd-HH:mm}";
     }
 
     private void ResequenceLines()

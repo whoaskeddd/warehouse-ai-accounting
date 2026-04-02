@@ -17,8 +17,8 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel>
-                        <TextBlock Text="CATALOG"
-                                   Style="{StaticResource SectionEyebrowTextStyle}" />
+                        <TextBlock
+                                   Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="КАТАЛОГ"/></TextBlock>
                         <TextBlock Margin="0,10,0,0"
                                    Text="Товары"
                                    Style="{StaticResource PageTitleTextStyle}" />

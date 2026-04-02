@@ -9,4 +9,5 @@ public sealed class ProductLookupItem
     public decimal AvailableStock { get; init; }
 
     public string DisplayName => $"{Sku} · {Name}";
+    public override string ToString() => DisplayName;
 }

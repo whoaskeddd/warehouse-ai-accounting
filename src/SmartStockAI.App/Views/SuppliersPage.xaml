@@ -16,7 +16,7 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel>
-                        <TextBlock Text="DIRECTORY" Style="{StaticResource SectionEyebrowTextStyle}" />
+                        <TextBlock Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="СПРАВОЧНИК"/></TextBlock>
                         <TextBlock Margin="0,10,0,0" Text="Поставщики" Style="{StaticResource PageTitleTextStyle}" />
                         <TextBlock Margin="0,8,0,0" Text="Справочник поставщиков с базовой карточкой и контактной информацией." Style="{StaticResource PageDescriptionTextStyle}" />
                     </StackPanel>

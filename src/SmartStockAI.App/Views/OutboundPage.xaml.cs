@@ -428,7 +428,7 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
         _isRefreshingSelection = true;
         SelectedDocument = null;
         _isRefreshingSelection = false;
-        DocumentNumber = $"OUT-{DateTime.Now:HHmmss}";
+        DocumentNumber = CreateDefaultDocumentNumber("OUT");
         RecipientName = "Ручная выдача";
         DocumentStatus = "Черновик";
         DocumentComment = string.Empty;
@@ -498,7 +498,7 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
 
         var created = await _stockService.CreateDocumentAsync(new CreateStockDocumentRequest
         {
-            Number = string.IsNullOrWhiteSpace(DocumentNumber) ? $"OUT-{DateTime.Now:HHmmss}" : DocumentNumber.Trim(),
+            Number = string.IsNullOrWhiteSpace(DocumentNumber) ? CreateDefaultDocumentNumber("OUT") : DocumentNumber.Trim(),
             Type = StockDocumentType.Issue,
             Comment = string.IsNullOrWhiteSpace(DocumentComment) ? RecipientName : DocumentComment,
             Lines = requestLines
@@ -650,6 +650,11 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
         StockMovementType.Adjustment => "Корректировка",
         _ => type.ToString()
     };
+
+    private static string CreateDefaultDocumentNumber(string prefix)
+    {
+        return $"{prefix}-{DateTime.Now:yyyyMMdd-HH:mm}";
+    }
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {

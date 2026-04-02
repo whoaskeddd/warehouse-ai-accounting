@@ -226,7 +226,9 @@
                                             BorderThickness="1"
                                             CornerRadius="12">
                                         <TextBlock Text="{Binding SelectedProductStockText}"
-                                                   Foreground="{StaticResource TextPrimaryBrush}" />
+                                                   Foreground="{StaticResource TextPrimaryBrush}"
+                                                   HorizontalAlignment="Center"
+                                                   TextAlignment="Center" />
                                     </Border>
                                     <Border Grid.Row="1"
                                             Grid.Column="4"
@@ -254,16 +256,22 @@
                                               Style="{StaticResource AppDataGridStyle}">
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="#"
+                                                                ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                                                 Binding="{Binding LineNo}" />
                                             <DataGridTextColumn Header="SKU"
+                                                                ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                                                 Binding="{Binding Sku}" />
                                             <DataGridTextColumn Header="Товар"
+                                                                ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                                                 Binding="{Binding ProductName}" />
                                             <DataGridTextColumn Header="Кол-во"
+                                                                ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                                                 Binding="{Binding Quantity}" />
                                             <DataGridTextColumn Header="Остаток"
+                                                                ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                                                 Binding="{Binding AvailableStock}" />
                                             <DataGridTextColumn Header="Проверка"
+                                                                ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                                                 Binding="{Binding ValidationMessage}" />
                                         </DataGrid.Columns>
                                     </DataGrid>

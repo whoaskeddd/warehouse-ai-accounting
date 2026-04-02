@@ -49,16 +49,22 @@
                       Style="{StaticResource AppDataGridStyle}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Дата"
+                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding OccurredAt, StringFormat=dd.MM.yyyy HH:mm}" />
                     <DataGridTextColumn Header="Товар"
+                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding ProductName}" />
                     <DataGridTextColumn Header="Тип"
+                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding MovementType}" />
                     <DataGridTextColumn Header="Документ"
+                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding DocumentNumber}" />
                     <DataGridTextColumn Header="Кол-во"
+                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding Quantity}" />
                     <DataGridTextColumn Header="Остаток после"
+                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding BalanceAfter}" />
                 </DataGrid.Columns>
             </DataGrid>

@@ -7,143 +7,206 @@
       Background="Transparent"
       Title="Дашборд">
     <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
-    <Grid Margin="0,0,0,8">
-        <Border Style="{StaticResource PageContainerStyle}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-
-                <TextBlock Text="CONTROL CENTER"
-                           Style="{StaticResource SectionEyebrowTextStyle}" />
-                <TextBlock Grid.Row="1"
-                           Margin="0,10,0,0"
-                           Text="Дашборд"
-                           Style="{StaticResource PageTitleTextStyle}" />
-                <TextBlock Grid.Row="2"
-                           Margin="0,8,0,0"
-                           Text="Светлая рабочая панель крупные акценты, спокойные поверхности и минимум визуального шума."
-                           Style="{StaticResource PageDescriptionTextStyle}" />
-
-                <Grid Grid.Row="3"
-                      Margin="0,28,0,0">
+        <Grid Margin="0,0,0,8">
+            <Border Style="{StaticResource PageContainerStyle}">
+                <Grid>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <DockPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Button Content="Создать приход"
-                                    Style="{StaticResource PrimaryButtonStyle}" />
-                            <Button Margin="12,0,0,0"
-                                    Content="Посмотреть отчеты"
-                                    Style="{StaticResource SecondaryButtonStyle}" />
-                        </StackPanel>
-                        <StackPanel DockPanel.Dock="Right"
-                                    Orientation="Horizontal"
-                                    HorizontalAlignment="Right"/>
-                        </DockPanel>
+                    <TextBlock Style="{StaticResource SectionEyebrowTextStyle}"
+                               Text="ПАНЕЛЬ УПРАВЛЕНИЯ" />
+                    <TextBlock Grid.Row="1"
+                               Margin="0,10,0,0"
+                               Text="Дашборд"
+                               Style="{StaticResource PageTitleTextStyle}" />
+                    <TextBlock Grid.Row="2"
+                               Margin="0,8,0,0"
+                               Text="Последние движения по складу, ключевые сигналы по остаткам и быстрый переход к рабочим разделам."
+                               Style="{StaticResource PageDescriptionTextStyle}" />
 
-                    <Grid Grid.Row="1"
-                          Margin="0,24,0,0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2.2*" />
-                            <ColumnDefinition Width="1.15*" />
-                        </Grid.ColumnDefinitions>
+                    <Grid Grid.Row="3"
+                          Margin="0,28,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
 
-                        <StackPanel>
-                            <UniformGrid Columns="3">
-                                <Border Style="{StaticResource StatCardStyle}">
-                                    <StackPanel>
-                                        <TextBlock Text="Критичные остатки"
-                                                   Style="{StaticResource CardCaptionTextStyle}" />
-                                        <TextBlock Margin="0,10,0,0"
-                                                   Text="08"
-                                                   Style="{StaticResource CardValueTextStyle}" />
-                                        <TextBlock Margin="0,12,0,0"
-                                                   Text="Позиции, требующие внимания сегодня"
-                                                   Style="{StaticResource PlaceholderTextStyle}" />
-                                    </StackPanel>
-                                </Border>
-                                <Border Style="{StaticResource StatCardStyle}">
-                                    <StackPanel>
-                                        <TextBlock Text="Ожидаемые закупки"
-                                                   Style="{StaticResource CardCaptionTextStyle}" />
-                                        <TextBlock Margin="0,10,0,0"
-                                                   Text="12"
-                                                   Style="{StaticResource CardValueTextStyle}" />
-                                        <TextBlock Margin="0,12,0,0"
-                                                   Text="Рекомендации появятся после подключения backend"
-                                                   Style="{StaticResource PlaceholderTextStyle}" />
-                                    </StackPanel>
-                                </Border>
-                                <Border Style="{StaticResource StatCardStyle}">
-                                    <StackPanel>
-                                        <TextBlock Text="Открытые документы"
-                                                   Style="{StaticResource CardCaptionTextStyle}" />
-                                        <TextBlock Margin="0,10,0,0"
-                                                   Text="03"
-                                                   Style="{StaticResource CardValueTextStyle}" />
-                                        <TextBlock Margin="0,12,0,0"
-                                                   Text="Черновики прихода и расхода"
-                                                   Style="{StaticResource PlaceholderTextStyle}" />
-                                    </StackPanel>
-                                </Border>
-                            </UniformGrid>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
 
-                            <Border Margin="0,20,0,0"
-                                    Style="{StaticResource PanelCardStyle}">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Последние движения"
-                                                   Style="{StaticResource CardCaptionTextStyle}" />
-                                        <TextBlock Margin="0,8,0,0"
-                                                   Text="Таймлайн подключится на шаге 3"
-                                                   Style="{StaticResource PageTitleTextStyle}"
-                                                   FontSize="24" />
-                                        <TextBlock Margin="0,8,0,0"
-                                                   Text="Сейчас блок нужен как композиционная опора интерфейса и место под живой контент."
-                                                   Style="{StaticResource PageDescriptionTextStyle}" />
-                                    </StackPanel>
-                                    <Border Grid.Column="1"
-                                            Width="120"
-                                            Height="120"
-                                            CornerRadius="30"
-                                            Background="#FFEFF4FF" />
-                                </Grid>
-                            </Border>
-                        </StackPanel>
-
-                        <Border Grid.Column="1"
-                                Margin="20,0,0,0"
-                                Style="{StaticResource PanelCardStyle}">
-                            <StackPanel>
-                                <TextBlock Text="Ключевой фокус"
-                                           Style="{StaticResource CardCaptionTextStyle}" />
-                                <TextBlock Margin="0,8,0,0"
-                                           Text="Воздушный shell"
-                                           Style="{StaticResource PageTitleTextStyle}"
-                                           FontSize="24" />
-                                <TextBlock Margin="0,10,0,0"
-                                           Text="Меньше перегруженных блоков, больше пространства, чистая типографика и понятные действия."
-                                           Style="{StaticResource PageDescriptionTextStyle}" />
-                                <Button Margin="0,18,0,0"
-                                        Content="Перейти к товарам"
-                                        Style="{StaticResource PrimaryButtonStyle}" Click="Button_Click" />
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Создать приход"
+                                        Click="OpenInboundButton_OnClick"
+                                        Style="{StaticResource PrimaryButtonStyle}" />
+                                <Button Margin="12,0,0,0"
+                                        Content="Открыть расход"
+                                        Click="OpenOutboundButton_OnClick"
+                                        Style="{StaticResource SecondaryButtonStyle}" />
                             </StackPanel>
-                        </Border>
+
+                            <Button Grid.Column="1"
+                                    Margin="12,0,0,0"
+                                    Content="Обновить"
+                                    Click="RefreshButton_OnClick"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                        </Grid>
+
+                        <Grid Grid.Row="1"
+                              Margin="0,24,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2.2*" />
+                                <ColumnDefinition Width="1.15*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <UniformGrid Columns="3">
+                                    <Border Style="{StaticResource StatCardStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="Критичные остатки"
+                                                       Style="{StaticResource CardCaptionTextStyle}" />
+                                            <TextBlock Margin="0,10,0,0"
+                                                       Text="{Binding CriticalStockCount}"
+                                                       Style="{StaticResource CardValueTextStyle}" />
+                                            <TextBlock Margin="0,12,0,0"
+                                                       Text="Позиции, где доступный остаток уже на минимуме или ниже."
+                                                       Style="{StaticResource PlaceholderTextStyle}" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource StatCardStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="Движения сегодня"
+                                                       Style="{StaticResource CardCaptionTextStyle}" />
+                                            <TextBlock Margin="0,10,0,0"
+                                                       Text="{Binding TodayMovementsCount}"
+                                                       Style="{StaticResource CardValueTextStyle}" />
+                                            <TextBlock Margin="0,12,0,0"
+                                                       Text="Все приходные, расходные и резервные операции за текущий день."
+                                                       Style="{StaticResource PlaceholderTextStyle}" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource StatCardStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="Черновики документов"
+                                                       Style="{StaticResource CardCaptionTextStyle}" />
+                                            <TextBlock Margin="0,10,0,0"
+                                                       Text="{Binding DraftDocumentsCount}"
+                                                       Style="{StaticResource CardValueTextStyle}" />
+                                            <TextBlock Margin="0,12,0,0"
+                                                       Text="Открытые приходные и расходные документы, ожидающие проведения."
+                                                       Style="{StaticResource PlaceholderTextStyle}" />
+                                        </StackPanel>
+                                    </Border>
+                                </UniformGrid>
+
+                                <Border Margin="0,20,0,0"
+                                        Style="{StaticResource PanelCardStyle}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel>
+                                                <TextBlock Text="Последние движения"
+                                                           Style="{StaticResource CardCaptionTextStyle}" />
+                                                <TextBlock Margin="0,8,0,0"
+                                                           Text="Живая лента операций по складу"
+                                                           Style="{StaticResource PageTitleTextStyle}"
+                                                           FontSize="24" />
+                                            </StackPanel>
+
+                                            <Border Grid.Column="1"
+                                                    Style="{StaticResource PillBadgeStyle}"
+                                                    VerticalAlignment="Top">
+                                                <TextBlock Text="{Binding RecentMovementsSummary}"
+                                                           Foreground="{StaticResource TextSecondaryBrush}" />
+                                            </Border>
+                                        </Grid>
+
+                                        <TextBlock Grid.Row="1"
+                                                   Margin="0,8,0,0"
+                                                   Text="Показываются последние движения с типом операции, документом и остатком после проведения."
+                                                   Style="{StaticResource PageDescriptionTextStyle}" />
+
+                                        <Border Grid.Row="2"
+                                                Margin="0,18,0,0"
+                                                Padding="4"
+                                                Background="#FFF8FAFD"
+                                                BorderBrush="{StaticResource BorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="18">
+                                            <DataGrid ItemsSource="{Binding RecentMovements}"
+                                                      AutoGenerateColumns="False"
+                                                      CanUserAddRows="False"
+                                                      HeadersVisibility="Column"
+                                                      IsReadOnly="True"
+                                                      Style="{StaticResource AppDataGridStyle}">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Дата"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding OccurredAt, StringFormat=dd.MM.yyyy HH:mm}" />
+                                                    <DataGridTextColumn Header="SKU"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding Sku}" />
+                                                    <DataGridTextColumn Header="Товар"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding ProductName}" />
+                                                    <DataGridTextColumn Header="Тип"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding MovementType}" />
+                                                    <DataGridTextColumn Header="Документ"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding DocumentNumber}" />
+                                                    <DataGridTextColumn Header="Кол-во"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding Quantity}" />
+                                                    <DataGridTextColumn Header="Остаток после"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding BalanceAfter}" />
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+
+                            <Border Grid.Column="1"
+                                    Margin="20,0,0,0"
+                                    Style="{StaticResource PanelCardStyle}">
+                                <StackPanel>
+                                    <TextBlock Text="Ключевой фокус"
+                                               Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBlock Margin="0,8,0,0"
+                                               Text="{Binding FocusTitle}"
+                                               Style="{StaticResource PageTitleTextStyle}"
+                                               FontSize="24" />
+                                    <TextBlock Margin="0,10,0,0"
+                                               Text="{Binding FocusDescription}"
+                                               Style="{StaticResource PageDescriptionTextStyle}" />
+                                    <Button Margin="0,18,0,0"
+                                            Content="Перейти к товарам"
+                                            Click="OpenProductsButton_OnClick"
+                                            Style="{StaticResource PrimaryButtonStyle}" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </Grid>
                 </Grid>
-            </Grid>
-        </Border>
-    </Grid>
+            </Border>
+        </Grid>
     </ScrollViewer>
 </Page>
