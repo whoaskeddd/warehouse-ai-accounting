@@ -2,13 +2,19 @@ using Microsoft.EntityFrameworkCore;
 using SmartStockAI.Core.Contracts.Locations;
 using SmartStockAI.Core.Entities;
 using SmartStockAI.Data.Context;
+using SmartStockAI.Data.Security;
 
 namespace SmartStockAI.Data.Services;
 
-public sealed class LocationService(AppDbContext dbContext) : ILocationService
+public sealed class LocationService(
+    AppDbContext dbContext,
+    ICurrentUserAccessor currentUserAccessor,
+    IAuditLogWriter auditLogWriter) : ILocationService
 {
     public async Task<IReadOnlyList<LocationDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);
+
         return await dbContext.Locations
             .AsNoTracking()
             .OrderBy(x => x.Name)
@@ -18,6 +24,8 @@ public sealed class LocationService(AppDbContext dbContext) : ILocationService
 
     public async Task<LocationDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);
+
         return await dbContext.Locations
             .AsNoTracking()
             .Where(x => x.Id == id)
@@ -27,6 +35,8 @@ public sealed class LocationService(AppDbContext dbContext) : ILocationService
 
     public async Task<LocationDto> CreateAsync(CreateLocationRequest request, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var normalizedName = request.Name.Trim();
         if (string.IsNullOrWhiteSpace(normalizedName))
         {
@@ -43,12 +53,15 @@ public sealed class LocationService(AppDbContext dbContext) : ILocationService
 
         dbContext.Locations.Add(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Location.Created", nameof(Location), entity.Id.ToString(), $"Location '{entity.Name}' created.", cancellationToken);
 
         return (await GetByIdAsync(entity.Id, cancellationToken))!;
     }
 
     public async Task<LocationDto?> UpdateAsync(int id, UpdateLocationRequest request, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var entity = await dbContext.Locations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (entity is null)
         {
@@ -67,12 +80,15 @@ public sealed class LocationService(AppDbContext dbContext) : ILocationService
         entity.ParentLocationId = request.ParentLocationId;
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Location.Updated", nameof(Location), entity.Id.ToString(), $"Location '{entity.Name}' updated.", cancellationToken);
 
         return await GetByIdAsync(id, cancellationToken);
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var entity = await dbContext.Locations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (entity is null)
         {
@@ -93,6 +109,7 @@ public sealed class LocationService(AppDbContext dbContext) : ILocationService
 
         dbContext.Locations.Remove(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Location.Deleted", nameof(Location), id.ToString(), $"Location '{entity.Name}' deleted.", cancellationToken);
 
         return true;
     }

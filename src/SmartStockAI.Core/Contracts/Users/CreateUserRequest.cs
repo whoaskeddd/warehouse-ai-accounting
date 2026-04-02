@@ -6,5 +6,7 @@ public sealed class CreateUserRequest
 {
     public string Login { get; init; } = string.Empty;
     public string DisplayName { get; init; } = string.Empty;
+    public string Password { get; init; } = string.Empty;
     public UserRole Role { get; init; }
+    public bool IsActive { get; init; } = true;
 }

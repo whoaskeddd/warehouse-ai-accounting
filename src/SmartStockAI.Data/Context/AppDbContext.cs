@@ -14,6 +14,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<StockDocument> StockDocuments => Set<StockDocument>();
     public DbSet<StockDocumentLine> StockDocumentLines => Set<StockDocumentLine>();
     public DbSet<StockReservation> StockReservations => Set<StockReservation>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+    public DbSet<InventorySession> InventorySessions => Set<InventorySession>();
+    public DbSet<InventorySessionLine> InventorySessionLines => Set<InventorySessionLine>();
+    public DbSet<DiscrepancyReport> DiscrepancyReports => Set<DiscrepancyReport>();
+    public DbSet<BackupEntry> BackupEntries => Set<BackupEntry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

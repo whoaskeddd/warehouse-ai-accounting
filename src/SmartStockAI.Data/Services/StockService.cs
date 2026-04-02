@@ -3,13 +3,19 @@ using SmartStockAI.Core.Contracts.Stock;
 using SmartStockAI.Core.Entities;
 using SmartStockAI.Core.Enums;
 using SmartStockAI.Data.Context;
+using SmartStockAI.Data.Security;
 
 namespace SmartStockAI.Data.Services;
 
-public sealed class StockService(AppDbContext dbContext) : IStockService
+public sealed class StockService(
+    AppDbContext dbContext,
+    ICurrentUserAccessor currentUserAccessor,
+    IAuditLogWriter auditLogWriter) : IStockService
 {
     public async Task<IReadOnlyList<StockDocumentDto>> GetDocumentsAsync(StockDocumentType? type = null, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);
+
         var query = dbContext.StockDocuments
             .AsNoTracking()
             .Include(x => x.Supplier)
@@ -31,6 +37,8 @@ public sealed class StockService(AppDbContext dbContext) : IStockService
 
     public async Task<StockDocumentDto?> GetDocumentByIdAsync(int id, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);
+
         var entity = await dbContext.StockDocuments
             .AsNoTracking()
             .Include(x => x.Supplier)
@@ -43,6 +51,8 @@ public sealed class StockService(AppDbContext dbContext) : IStockService
 
     public async Task<StockDocumentDto> CreateDocumentAsync(CreateStockDocumentRequest request, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var number = NormalizeDocumentNumber(request.Number);
         await EnsureDocumentNumberUniqueAsync(number, null, cancellationToken);
         await ValidateSupplierAsync(request.SupplierId, cancellationToken);
@@ -60,12 +70,15 @@ public sealed class StockService(AppDbContext dbContext) : IStockService
 
         dbContext.StockDocuments.Add(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("StockDocument.Created", nameof(StockDocument), entity.Id.ToString(), $"Stock document '{entity.Number}' created.", cancellationToken);
 
         return (await GetDocumentByIdAsync(entity.Id, cancellationToken))!;
     }
 
     public async Task<StockDocumentDto?> UpdateDocumentAsync(int id, UpdateStockDocumentRequest request, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var entity = await dbContext.StockDocuments
             .Include(x => x.Lines)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -84,11 +97,14 @@ public sealed class StockService(AppDbContext dbContext) : IStockService
         entity.Comment = NormalizeOptional(request.Comment);
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("StockDocument.Updated", nameof(StockDocument), entity.Id.ToString(), $"Stock document '{entity.Number}' updated.", cancellationToken);
         return await GetDocumentByIdAsync(id, cancellationToken);
     }
 
     public async Task<StockDocumentDto?> PostDocumentAsync(int id, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var entity = await dbContext.StockDocuments
             .Include(x => x.Lines)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -139,11 +155,15 @@ public sealed class StockService(AppDbContext dbContext) : IStockService
         entity.PostedAt = DateTime.UtcNow;
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        var action = entity.Type == StockDocumentType.Receipt ? "Receipt.Posted" : "Issue.Posted";
+        await auditLogWriter.WriteAsync(action, nameof(StockDocument), entity.Id.ToString(), $"Stock document '{entity.Number}' posted.", cancellationToken);
         return await GetDocumentByIdAsync(id, cancellationToken);
     }
 
     public async Task<StockDocumentDto?> CancelDocumentAsync(int id, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var entity = await dbContext.StockDocuments.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (entity is null)
         {
@@ -153,12 +173,15 @@ public sealed class StockService(AppDbContext dbContext) : IStockService
         EnsureDraft(entity);
         entity.Status = StockDocumentStatus.Cancelled;
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("StockDocument.Cancelled", nameof(StockDocument), entity.Id.ToString(), $"Stock document '{entity.Number}' cancelled.", cancellationToken);
 
         return await GetDocumentByIdAsync(id, cancellationToken);
     }
 
     public async Task<IReadOnlyList<StockMovementDto>> GetMovementsAsync(int? productId = null, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);
+
         var query = dbContext.StockMovements
             .AsNoTracking()
             .Include(x => x.Product)
@@ -178,6 +201,8 @@ public sealed class StockService(AppDbContext dbContext) : IStockService
 
     public async Task<StockReservationDto> CreateReservationAsync(CreateStockReservationRequest request, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         if (request.Quantity <= 0)
         {
             throw new ArgumentException("Reservation quantity must be greater than zero.", nameof(request));
@@ -211,12 +236,15 @@ public sealed class StockService(AppDbContext dbContext) : IStockService
 
         dbContext.StockMovements.Add(CreateMovement(product, StockMovementType.Reservation, request.Quantity, null, reservation.Id, null, reservation.Comment));
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Reservation.Created", nameof(StockReservation), reservation.Id.ToString(), $"Reservation '{reservation.Reference}' created.", cancellationToken);
 
         return MapReservation(reservation, product);
     }
 
     public async Task<StockReservationDto?> ReleaseReservationAsync(int reservationId, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var reservation = await dbContext.StockReservations
             .Include(x => x.Product)
             .FirstOrDefaultAsync(x => x.Id == reservationId, cancellationToken);
@@ -233,6 +261,7 @@ public sealed class StockService(AppDbContext dbContext) : IStockService
             reservation.Product.ReservedStock = Math.Max(0, reservation.Product.ReservedStock - reservation.Quantity);
             dbContext.StockMovements.Add(CreateMovement(reservation.Product, StockMovementType.ReservationRelease, reservation.Quantity, null, reservation.Id, null, reservation.Comment));
             await dbContext.SaveChangesAsync(cancellationToken);
+            await auditLogWriter.WriteAsync("Reservation.Released", nameof(StockReservation), reservation.Id.ToString(), $"Reservation '{reservation.Reference}' released.", cancellationToken);
         }
 
         return MapReservation(reservation, reservation.Product);

@@ -5,6 +5,7 @@ using SmartStockAI.Core.Contracts.Stock;
 using SmartStockAI.Core.Entities;
 using SmartStockAI.Core.Enums;
 using SmartStockAI.Data.Context;
+using SmartStockAI.Data.Security;
 using SmartStockAI.Data.Services;
 
 namespace SmartStockAI.Tests;
@@ -32,7 +33,7 @@ public class StockServiceTests : IDisposable
     {
         await using var context = CreateContext();
         var product = await SeedProductAsync(context, currentStock: 10m);
-        var service = new StockService(context);
+        var service = CreateStockService(context);
 
         var document = await service.CreateDocumentAsync(new CreateStockDocumentRequest
         {
@@ -71,7 +72,7 @@ public class StockServiceTests : IDisposable
     {
         await using var context = CreateContext();
         var product = await SeedProductAsync(context, currentStock: 10m);
-        var service = new StockService(context);
+        var service = CreateStockService(context);
 
         await service.CreateReservationAsync(new CreateStockReservationRequest
         {
@@ -112,7 +113,7 @@ public class StockServiceTests : IDisposable
     {
         await using var context = CreateContext();
         var product = await SeedProductAsync(context, currentStock: 10m);
-        var service = new StockService(context);
+        var service = CreateStockService(context);
 
         var reservation = await service.CreateReservationAsync(new CreateStockReservationRequest
         {
@@ -163,6 +164,13 @@ public class StockServiceTests : IDisposable
 
     private AppDbContext CreateContext() => new(_options);
 
+    private static StockService CreateStockService(AppDbContext context)
+    {
+        var currentUserAccessor = new CurrentUserAccessor();
+        currentUserAccessor.SetCurrentUser(1, UserRole.WarehouseOperator);
+        return new StockService(context, currentUserAccessor, new TestAuditLogWriter());
+    }
+
     private static async Task<Product> SeedProductAsync(AppDbContext context, decimal currentStock)
     {
         var product = new Product
@@ -180,5 +188,13 @@ public class StockServiceTests : IDisposable
         context.Products.Add(product);
         await context.SaveChangesAsync();
         return product;
+    }
+}
+
+internal sealed class TestAuditLogWriter : IAuditLogWriter
+{
+    public Task WriteAsync(string actionType, string entityType, string entityId, string details, CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
     }
 }

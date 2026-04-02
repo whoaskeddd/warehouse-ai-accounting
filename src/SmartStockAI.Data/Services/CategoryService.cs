@@ -2,13 +2,19 @@ using Microsoft.EntityFrameworkCore;
 using SmartStockAI.Core.Contracts.Categories;
 using SmartStockAI.Core.Entities;
 using SmartStockAI.Data.Context;
+using SmartStockAI.Data.Security;
 
 namespace SmartStockAI.Data.Services;
 
-public sealed class CategoryService(AppDbContext dbContext) : ICategoryService
+public sealed class CategoryService(
+    AppDbContext dbContext,
+    ICurrentUserAccessor currentUserAccessor,
+    IAuditLogWriter auditLogWriter) : ICategoryService
 {
     public async Task<IReadOnlyList<CategoryDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);
+
         return await dbContext.Categories
             .AsNoTracking()
             .OrderBy(x => x.Name)
@@ -18,6 +24,8 @@ public sealed class CategoryService(AppDbContext dbContext) : ICategoryService
 
     public async Task<CategoryDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);
+
         return await dbContext.Categories
             .AsNoTracking()
             .Where(x => x.Id == id)
@@ -27,6 +35,8 @@ public sealed class CategoryService(AppDbContext dbContext) : ICategoryService
 
     public async Task<CategoryDto> CreateAsync(CreateCategoryRequest request, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var normalizedName = request.Name.Trim();
         if (string.IsNullOrWhiteSpace(normalizedName))
         {
@@ -43,12 +53,15 @@ public sealed class CategoryService(AppDbContext dbContext) : ICategoryService
 
         dbContext.Categories.Add(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Category.Created", nameof(Category), entity.Id.ToString(), $"Category '{entity.Name}' created.", cancellationToken);
 
         return (await GetByIdAsync(entity.Id, cancellationToken))!;
     }
 
     public async Task<CategoryDto?> UpdateAsync(int id, UpdateCategoryRequest request, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var entity = await dbContext.Categories.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (entity is null)
         {
@@ -67,12 +80,15 @@ public sealed class CategoryService(AppDbContext dbContext) : ICategoryService
         entity.ParentCategoryId = request.ParentCategoryId;
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Category.Updated", nameof(Category), entity.Id.ToString(), $"Category '{entity.Name}' updated.", cancellationToken);
 
         return await GetByIdAsync(id, cancellationToken);
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var entity = await dbContext.Categories.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (entity is null)
         {
@@ -93,6 +109,7 @@ public sealed class CategoryService(AppDbContext dbContext) : ICategoryService
 
         dbContext.Categories.Remove(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Category.Deleted", nameof(Category), id.ToString(), $"Category '{entity.Name}' deleted.", cancellationToken);
 
         return true;
     }
