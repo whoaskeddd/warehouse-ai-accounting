@@ -7,6 +7,8 @@ using SmartStockAI.Core.Contracts.Locations;
 using SmartStockAI.Core.Contracts.Products;
 using SmartStockAI.Core.Contracts.Stock;
 using SmartStockAI.Core.Contracts.Suppliers;
+using SmartStockAI.Core.Contracts.Users;
+using SmartStockAI.App.Services;
 using SmartStockAI.Data.Context;
 using SmartStockAI.Data.Services;
 using System.Windows;
@@ -50,6 +52,10 @@ public partial class App : Application
                 services.AddScoped<ISupplierService, SupplierService>();
                 services.AddScoped<ILocationService, LocationService>();
                 services.AddScoped<IStockService, StockService>();
+                services.AddScoped<IUserService, UserService>();
+                services.AddSingleton<AppSessionService>();
+                services.AddSingleton<AuditTrailService>();
+                services.AddSingleton<BackupWorkspaceService>();
                 services.AddTransient<MainWindow>();
                 services.AddTransient<Views.ProductsPage>();
                 services.AddTransient<Views.CategoriesPage>();
@@ -59,6 +65,8 @@ public partial class App : Application
                 services.AddTransient<Views.InboundPage>();
                 services.AddTransient<Views.OutboundPage>();
                 services.AddTransient<Views.InventoryPage>();
+                services.AddTransient<Views.UsersPage>();
+                services.AddTransient<Views.AdministrationPage>();
                 services.AddTransient<Views.ReportsPage>();
             })
             .Build();

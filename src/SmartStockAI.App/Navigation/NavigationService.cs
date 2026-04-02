@@ -27,6 +27,8 @@ public sealed class NavigationService
             ["Inbound"] = typeof(InboundPage),
             ["Outbound"] = typeof(OutboundPage),
             ["Inventory"] = typeof(InventoryPage),
+            ["Users"] = typeof(UsersPage),
+            ["Administration"] = typeof(AdministrationPage),
             ["Reports"] = typeof(ReportsPage)
         };
     }

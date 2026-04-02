@@ -41,13 +41,15 @@
             <DockPanel Margin="22">
                 <StackPanel DockPanel.Dock="Top"
                             Margin="0,0,0,28">
-                    <TextBlock
-                               Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="Склад ИИ"/></TextBlock>
-                    <TextBlock
-                               Style="{StaticResource AppTitleTextStyle}" Width="225" ><Run Language="ru-ru" Text="Умный склад ИИ"/></TextBlock>
+                    <TextBlock Style="{StaticResource SectionEyebrowTextStyle}"
+                               Text="СКЛАД ИИ" />
+                    <TextBlock Style="{StaticResource AppTitleTextStyle}"
+                               Width="225"
+                               Text="Умный склад ИИ" />
                     <TextBlock Margin="0,6,0,0"
                                MaxWidth="228"
-                               Style="{StaticResource AppSubtitleTextStyle}" ><Run Text="Абрамов Смелов "/><Run Language="ru-ru" Text="Шарапов"/></TextBlock>
+                               Style="{StaticResource AppSubtitleTextStyle}"
+                               Text="Frontend shell для складского учета, инвентаризации и администрирования." />
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom"
@@ -64,12 +66,26 @@
                                        MaxWidth="190" />
                             <TextBlock Margin="0,8,0,0"
                                        MaxWidth="210"
-                                       Text="Начинай с наполнения каталога, затем переходи к документам движения."
+                                       Text="Начни с наполнения каталога, затем переходи к документам движения."
                                        Style="{StaticResource PageDescriptionTextStyle}" />
                             <Button Margin="0,18,0,0"
                                     Content="Открыть товары"
                                     Click="OpenProductsButton_OnClick"
                                     Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource PanelCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Активный пользователь"
+                                       Style="{StaticResource CardCaptionTextStyle}" />
+                            <TextBlock Margin="0,8,0,0"
+                                       Text="{Binding CurrentUserDisplay}"
+                                       Style="{StaticResource PageDescriptionTextStyle}" />
+                            <Button Margin="0,16,0,0"
+                                    Content="Открыть пользователей"
+                                    Click="OpenUsersButton_OnClick"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
@@ -95,6 +111,10 @@
                                  Content="Расход" />
                     <ListBoxItem Tag="Inventory"
                                  Content="Инвентаризация" />
+                    <ListBoxItem Tag="Users"
+                                 Content="Пользователи" />
+                    <ListBoxItem Tag="Administration"
+                                 Content="Backup и аудит" />
                     <ListBoxItem Tag="Reports"
                                  Content="Отчеты" />
                 </ListBox>

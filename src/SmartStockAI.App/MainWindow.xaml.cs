@@ -1,26 +1,39 @@
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
 using SmartStockAI.App.Navigation;
+using SmartStockAI.App.Services;
 
 namespace SmartStockAI.App;
 
-public partial class MainWindow : Window
+public partial class MainWindow : Window, INotifyPropertyChanged
 {
     private readonly NavigationService _navigationService;
+    private readonly AppSessionService _appSession;
     private bool _isSynchronizingNavigationSelection;
 
-    public MainWindow(IServiceProvider serviceProvider)
+    public MainWindow(IServiceProvider serviceProvider, AppSessionService appSession)
     {
+        _appSession = appSession;
+
         InitializeComponent();
+        DataContext = this;
+
         _navigationService = new NavigationService(
             MainFrame,
             serviceProvider.GetRequiredService<IServiceScopeFactory>());
 
+        _appSession.CurrentUserChanged += AppSession_OnCurrentUserChanged;
+
         NavigationList.SelectedIndex = 0;
         _navigationService.Navigate("Dashboard");
     }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    public string CurrentUserDisplay => _appSession.CurrentUserDisplayName;
 
     private void NavigationList_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
@@ -40,6 +53,11 @@ public partial class MainWindow : Window
     private void OpenProductsButton_OnClick(object sender, RoutedEventArgs e)
     {
         NavigateTo("Products");
+    }
+
+    private void OpenUsersButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        NavigateTo("Users");
     }
 
     public void NavigateTo(string key)
@@ -62,5 +80,10 @@ public partial class MainWindow : Window
         {
             _isSynchronizingNavigationSelection = false;
         }
+    }
+
+    private void AppSession_OnCurrentUserChanged(object? sender, EventArgs e)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CurrentUserDisplay)));
     }
 }
