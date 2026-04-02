@@ -13,6 +13,7 @@
 - `LocationId`
 - `Unit`
 - `CurrentStock`
+- `ReservedStock`
 - `MinimumStock`
 - `PurchasePrice`
 - `SalePrice`
@@ -58,12 +59,46 @@
 - `MovementType`
 - `Quantity`
 - `DocumentNumber`
-- `OccurredAtUtc`
-- `CreatedByUserId`
+- `StockDocumentId`
+- `ReservationId`
+- `CreatedAtUtc`
+- `BalanceAfter`
 - `Comment`
+
+### StockDocument
+- `Id`
+- `Number`
+- `DocumentType`
+- `Status`
+- `SupplierId`
+- `Comment`
+- `CreatedAtUtc`
+- `PostedAtUtc`
+- `Items[]`
+
+### StockDocumentItem
+- `Id`
+- `StockDocumentId`
+- `ProductId`
+- `Quantity`
+- `UnitPrice`
+- `Comment`
+
+### StockReservation
+- `Id`
+- `ProductId`
+- `Quantity`
+- `Reference`
+- `Comment`
+- `CreatedAtUtc`
+- `ReleasedAtUtc`
+- `IsReleased`
 
 ## UI-поля, которые нужны уже на шаге 2
 
 - Для списка товаров: `Sku`, `Name`, `CategoryName`, `SupplierName`, `CurrentStock`, `MinimumStock`, `LocationName`
 - Для карточки товара: все поля `Product` плюс справочники категорий, поставщиков и локаций
 - Для документов: `DocumentNumber`, `Status`, `CreatedAtUtc`, `Items[]`, `Comment`
+- Для шага 3 UI должен получать для документов еще и: `DocumentType`, `PostedAtUtc`, `TotalItems`, `TotalQuantity`
+- Для журнала движений UI должен получать: `OccurredAtUtc`, `ProductName`, `Sku`, `MovementType`, `Quantity`, `BalanceAfter`, `DocumentNumber`, `Comment`
+- Для проверки нехватки UI должен получать: `CurrentStock`, `ReservedStock`, `AvailableStock`

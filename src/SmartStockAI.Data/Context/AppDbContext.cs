@@ -11,6 +11,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<User> Users => Set<User>();
     public DbSet<StockMovement> StockMovements => Set<StockMovement>();
+    public DbSet<StockDocument> StockDocuments => Set<StockDocument>();
+    public DbSet<StockDocumentLine> StockDocumentLines => Set<StockDocumentLine>();
+    public DbSet<StockReservation> StockReservations => Set<StockReservation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

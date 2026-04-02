@@ -13,6 +13,8 @@ public sealed class ProductDto
     public string? LocationName { get; init; }
     public string Unit { get; init; } = string.Empty;
     public decimal CurrentStock { get; init; }
+    public decimal ReservedStock { get; init; }
+    public decimal AvailableStock { get; init; }
     public decimal MinStock { get; init; }
     public decimal PurchasePrice { get; init; }
     public decimal SalePrice { get; init; }

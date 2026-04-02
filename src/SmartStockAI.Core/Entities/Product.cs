@@ -10,6 +10,7 @@ public class Product
     public int? LocationId { get; set; }
     public string Unit { get; set; } = string.Empty;
     public decimal CurrentStock { get; set; }
+    public decimal ReservedStock { get; set; }
     public decimal MinStock { get; set; }
     public decimal PurchasePrice { get; set; }
     public decimal SalePrice { get; set; }
@@ -18,4 +19,6 @@ public class Product
     public Supplier? Supplier { get; set; }
     public Location? Location { get; set; }
     public ICollection<StockMovement> StockMovements { get; set; } = new List<StockMovement>();
+    public ICollection<StockDocumentLine> StockDocumentLines { get; set; } = new List<StockDocumentLine>();
+    public ICollection<StockReservation> StockReservations { get; set; } = new List<StockReservation>();
 }

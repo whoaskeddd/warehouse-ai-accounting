@@ -20,15 +20,31 @@ public class StockMovementConfiguration : IEntityTypeConfiguration<StockMovement
         builder.Property(x => x.Quantity)
             .HasPrecision(18, 3);
 
+        builder.Property(x => x.BalanceAfter)
+            .HasPrecision(18, 3);
+
         builder.Property(x => x.CreatedAt)
             .IsRequired();
 
         builder.Property(x => x.DocumentNumber)
             .HasMaxLength(64);
 
+        builder.Property(x => x.Comment)
+            .HasMaxLength(512);
+
         builder.HasOne(x => x.Product)
             .WithMany(x => x.StockMovements)
             .HasForeignKey(x => x.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne(x => x.StockDocument)
+            .WithMany(x => x.StockMovements)
+            .HasForeignKey(x => x.StockDocumentId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(x => x.Reservation)
+            .WithMany(x => x.StockMovements)
+            .HasForeignKey(x => x.ReservationId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

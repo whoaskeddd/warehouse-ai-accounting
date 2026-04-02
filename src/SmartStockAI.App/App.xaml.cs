@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using SmartStockAI.Core.Contracts.Categories;
 using SmartStockAI.Core.Contracts.Locations;
 using SmartStockAI.Core.Contracts.Products;
+using SmartStockAI.Core.Contracts.Stock;
 using SmartStockAI.Core.Contracts.Suppliers;
 using SmartStockAI.Data.Context;
 using SmartStockAI.Data.Services;
@@ -39,6 +40,7 @@ public partial class App : Application
                 services.AddScoped<ICategoryService, CategoryService>();
                 services.AddScoped<ISupplierService, SupplierService>();
                 services.AddScoped<ILocationService, LocationService>();
+                services.AddScoped<IStockService, StockService>();
                 services.AddTransient<MainWindow>();
                 services.AddTransient<Views.ProductsPage>();
                 services.AddTransient<Views.CategoriesPage>();

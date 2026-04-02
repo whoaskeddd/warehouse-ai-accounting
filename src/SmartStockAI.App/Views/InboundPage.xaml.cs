@@ -5,13 +5,21 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using SmartStockAI.App.Models;
+using SmartStockAI.Core.Contracts.Products;
+using SmartStockAI.Core.Contracts.Stock;
+using SmartStockAI.Core.Contracts.Suppliers;
+using SmartStockAI.Core.Enums;
 
 namespace SmartStockAI.App.Views;
 
 public partial class InboundPage : Page, INotifyPropertyChanged
 {
-    private readonly List<DocumentListItem> _allDocuments;
-    private readonly List<MovementHistoryItem> _allHistory;
+    private readonly IStockService _stockService;
+    private readonly IProductService _productService;
+    private readonly ISupplierService _supplierService;
+    private List<DocumentListItem> _allDocuments = [];
+    private List<MovementHistoryItem> _allHistory = [];
+    private List<StockDocumentDto> _documents = [];
     private string _documentFilterText = string.Empty;
     private string _historyFilterText = string.Empty;
     private DocumentListItem? _selectedDocument;
@@ -20,50 +28,26 @@ public partial class InboundPage : Page, INotifyPropertyChanged
     private LookupItem? _selectedSupplier;
     private string _documentNumber = string.Empty;
     private string _documentComment = string.Empty;
-    private string _documentStatus = "Р§РµСЂРЅРѕРІРёРє";
+    private string _documentStatus = "Черновик";
+    private int? _currentDocumentId;
+    private bool _isRefreshingSelection;
 
-    public InboundPage()
+    public InboundPage(IStockService stockService, IProductService productService, ISupplierService supplierService)
     {
+        _stockService = stockService;
+        _productService = productService;
+        _supplierService = supplierService;
+
         InitializeComponent();
         DataContext = this;
-
-        Suppliers =
-        [
-            new LookupItem { Id = 1, Name = "Northwind Foods" },
-            new LookupItem { Id = 2, Name = "Volga Retail Group" },
-            new LookupItem { Id = 3, Name = "Local Import Partner" }
-        ];
-
-        Products =
-        [
-            new ProductLookupItem { Id = 1, Sku = "MILK-1L", Name = "РњРѕР»РѕРєРѕ 1Р»", Unit = "С€С‚", AvailableStock = 42 },
-            new ProductLookupItem { Id = 2, Sku = "COF-250", Name = "РљРѕС„Рµ 250Рі", Unit = "С€С‚", AvailableStock = 18 },
-            new ProductLookupItem { Id = 3, Sku = "SUG-1KG", Name = "РЎР°С…Р°СЂ 1РєРі", Unit = "С€С‚", AvailableStock = 67 }
-        ];
-
-        _allDocuments =
-        [
-            new DocumentListItem { Id = 1, Number = "IN-24031", CounterpartyName = "Northwind Foods", Status = "РџСЂРѕРІРµРґРµРЅ", CreatedAt = DateTime.Today.AddDays(-1), LinesCount = 3, TotalQuantity = 96 },
-            new DocumentListItem { Id = 2, Number = "IN-24032", CounterpartyName = "Volga Retail Group", Status = "Р§РµСЂРЅРѕРІРёРє", CreatedAt = DateTime.Today, LinesCount = 2, TotalQuantity = 34 },
-            new DocumentListItem { Id = 3, Number = "IN-24033", CounterpartyName = "Local Import Partner", Status = "Р§РµСЂРЅРѕРІРёРє", CreatedAt = DateTime.Today, LinesCount = 1, TotalQuantity = 12 }
-        ];
-
-        _allHistory =
-        [
-            new MovementHistoryItem { OccurredAt = DateTime.Now.AddHours(-5), ProductName = "РњРѕР»РѕРєРѕ 1Р»", Sku = "MILK-1L", MovementType = "РџСЂРёС…РѕРґ", DocumentNumber = "IN-24031", Quantity = 24, BalanceAfter = 42, Comment = "РЈС‚СЂРµРЅРЅРёР№ РїСЂРёРµРј" },
-            new MovementHistoryItem { OccurredAt = DateTime.Now.AddHours(-3), ProductName = "РљРѕС„Рµ 250Рі", Sku = "COF-250", MovementType = "РџСЂРёС…РѕРґ", DocumentNumber = "IN-24031", Quantity = 16, BalanceAfter = 18, Comment = "Р”РѕР·Р°РІРѕР·" },
-            new MovementHistoryItem { OccurredAt = DateTime.Now.AddHours(-1), ProductName = "РЎР°С…Р°СЂ 1РєРі", Sku = "SUG-1KG", MovementType = "РџСЂРёС…РѕРґ", DocumentNumber = "IN-24032", Quantity = 10, BalanceAfter = 67, Comment = "Р§РµСЂРЅРѕРІРёРє РїРѕСЃС‚Р°РІРєРё" }
-        ];
 
         FilteredDocuments = [];
         FilteredHistory = [];
         Lines = [];
+        Suppliers = [];
+        Products = [];
 
-        SelectedSupplier = Suppliers.FirstOrDefault();
-        SelectedProduct = Products.FirstOrDefault();
-        NewDocument();
-        RefreshDocuments();
-        RefreshHistory();
+        Loaded += OnLoaded;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -74,23 +58,18 @@ public partial class InboundPage : Page, INotifyPropertyChanged
 
     public ObservableCollection<DocumentLineItem> Lines { get; }
 
-    public IReadOnlyList<LookupItem> Suppliers { get; }
+    public ObservableCollection<LookupItem> Suppliers { get; }
 
-    public IReadOnlyList<ProductLookupItem> Products { get; }
+    public ObservableCollection<ProductLookupItem> Products { get; }
 
     public DocumentListItem? SelectedDocument
     {
         get => _selectedDocument;
         set
         {
-            if (SetField(ref _selectedDocument, value) && value is not null)
+            if (SetField(ref _selectedDocument, value) && !_isRefreshingSelection)
             {
-                DocumentNumber = value.Number;
-                DocumentStatus = value.Status;
-                SelectedSupplier = Suppliers.FirstOrDefault(x => x.Name == value.CounterpartyName) ?? Suppliers.FirstOrDefault();
-                DocumentComment = $"Р”РѕРєСѓРјРµРЅС‚ {value.Number} РїРѕРґРіРѕС‚РѕРІР»РµРЅ РґР»СЏ РїСЂРёРµРјРєРё РїР°СЂС‚РёРё.";
-                LoadDocumentLines(value.Id);
-                OnPropertyChanged(nameof(QueueHeadline));
+                _ = LoadSelectedDocumentAsync(value);
             }
         }
     }
@@ -122,7 +101,13 @@ public partial class InboundPage : Page, INotifyPropertyChanged
     public string DocumentNumber
     {
         get => _documentNumber;
-        set => SetField(ref _documentNumber, value);
+        set
+        {
+            if (SetField(ref _documentNumber, value))
+            {
+                OnPropertyChanged(nameof(EditorTitle));
+            }
+        }
     }
 
     public string DocumentComment
@@ -167,43 +152,131 @@ public partial class InboundPage : Page, INotifyPropertyChanged
         }
     }
 
-    public string QueueHeadline => SelectedDocument is null ? "РЎРїРёСЃРѕРє РґРѕРєСѓРјРµРЅС‚РѕРІ" : $"РђРєС‚РёРІРЅС‹Р№: {SelectedDocument.Number}";
+    public string QueueHeadline => SelectedDocument is null ? "Список документов" : $"Активный: {SelectedDocument.Number}";
 
-    public string QueueSummary => $"{FilteredDocuments.Count} РґРѕРєСѓРјРµРЅС‚РѕРІ";
+    public string QueueSummary => $"{FilteredDocuments.Count} документов";
 
-    public string EditorTitle => $"{DocumentStatus} В· {DocumentNumber}";
+    public string EditorTitle => $"{DocumentStatus} · {DocumentNumber}";
 
-    public string TotalsText => $"РЎС‚СЂРѕРє: {Lines.Count} В· РљРѕР»-РІРѕ: {Lines.Sum(x => x.Quantity).ToString("0.##", CultureInfo.InvariantCulture)}";
+    public string TotalsText => $"Строк: {Lines.Count} · Кол-во: {Lines.Sum(x => x.Quantity).ToString("0.##", CultureInfo.InvariantCulture)}";
 
-    public string HistorySummary => $"{FilteredHistory.Count} РґРІРёР¶РµРЅРёР№";
+    public string HistorySummary => $"{FilteredHistory.Count} движений";
 
     public string SelectedProductStockText => SelectedProduct is null
-        ? "Р’С‹Р±РµСЂРё С‚РѕРІР°СЂ"
+        ? "Выбери товар"
         : $"{SelectedProduct.AvailableStock:0.##} {SelectedProduct.Unit}";
+
+    private async void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        Loaded -= OnLoaded;
+        await LoadPageAsync();
+    }
+
+    private async Task LoadPageAsync()
+    {
+        await LoadSuppliersAsync();
+        await LoadProductsAsync();
+        await LoadDocumentsAsync();
+        await LoadHistoryAsync();
+        NewDocument();
+    }
+
+    private async Task LoadSuppliersAsync()
+    {
+        var suppliers = await _supplierService.GetAllAsync();
+        Suppliers.Clear();
+        foreach (var item in suppliers.OrderBy(x => x.Name))
+        {
+            Suppliers.Add(new LookupItem { Id = item.Id, Name = item.Name });
+        }
+
+        if (SelectedSupplier is null)
+        {
+            SelectedSupplier = Suppliers.FirstOrDefault();
+        }
+    }
+
+    private async Task LoadProductsAsync()
+    {
+        var products = await _productService.GetAllAsync();
+        Products.Clear();
+        foreach (var item in products.OrderBy(x => x.Name))
+        {
+            Products.Add(new ProductLookupItem
+            {
+                Id = item.Id,
+                Sku = item.Sku,
+                Name = item.Name,
+                Unit = item.Unit,
+                AvailableStock = item.AvailableStock
+            });
+        }
+
+        SelectedProduct ??= Products.FirstOrDefault();
+        OnPropertyChanged(nameof(SelectedProductStockText));
+    }
+
+    private async Task LoadDocumentsAsync()
+    {
+        _documents = (await _stockService.GetDocumentsAsync(StockDocumentType.Receipt)).ToList();
+        _allDocuments = _documents
+            .Select(MapDocumentListItem)
+            .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.Id)
+            .ToList();
+
+        RefreshDocuments();
+    }
+
+    private async Task LoadHistoryAsync()
+    {
+        _allHistory = (await _stockService.GetMovementsAsync())
+            .Where(x => x.Type == StockMovementType.Receipt)
+            .Select(MapMovementHistoryItem)
+            .OrderByDescending(x => x.OccurredAt)
+            .ToList();
+
+        RefreshHistory();
+    }
+
+    private async Task LoadSelectedDocumentAsync(DocumentListItem? item)
+    {
+        if (item is null)
+        {
+            return;
+        }
+
+        var document = _documents.FirstOrDefault(x => x.Id == item.Id) ?? await _stockService.GetDocumentByIdAsync(item.Id);
+        if (document is null)
+        {
+            return;
+        }
+
+        ApplyDocument(document);
+    }
 
     private void NewDocumentButton_OnClick(object sender, RoutedEventArgs e)
     {
         NewDocument();
     }
 
-    private void AddLineButton_OnClick(object sender, RoutedEventArgs e)
+    private async void AddLineButton_OnClick(object sender, RoutedEventArgs e)
     {
         if (SelectedProduct is null)
         {
-            MessageBox.Show("Р’С‹Р±РµСЂРё С‚РѕРІР°СЂ РґР»СЏ СЃС‚СЂРѕРєРё РґРѕРєСѓРјРµРЅС‚Р°.", "РџСЂРёС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Выбери товар для строки документа.", "Приход", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
-        if (!decimal.TryParse(LineQuantityTextBox.Text, NumberStyles.Any, CultureInfo.InvariantCulture, out var quantity) &&
-            !decimal.TryParse(LineQuantityTextBox.Text, NumberStyles.Any, CultureInfo.GetCultureInfo("ru-RU"), out quantity))
+        if (!TryParseDecimal(LineQuantityTextBox.Text, out var quantity))
         {
-            MessageBox.Show("РљРѕР»РёС‡РµСЃС‚РІРѕ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ С‡РёСЃР»РѕРј.", "РџСЂРёС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Количество должно быть числом.", "Приход", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         if (quantity <= 0)
         {
-            MessageBox.Show("РљРѕР»РёС‡РµСЃС‚РІРѕ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ РЅСѓР»СЏ.", "РџСЂРёС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Количество должно быть больше нуля.", "Приход", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -215,15 +288,18 @@ public partial class InboundPage : Page, INotifyPropertyChanged
             Quantity = quantity,
             AvailableStock = SelectedProduct.AvailableStock,
             Unit = SelectedProduct.Unit,
-            Comment = LineCommentTextBox.Text.Trim()
+            Comment = LineCommentTextBox.Text.Trim(),
+            ValidationMessage = "OK"
         });
 
         LineQuantityTextBox.Text = string.Empty;
         LineCommentTextBox.Text = string.Empty;
         OnPropertyChanged(nameof(TotalsText));
+
+        await SaveDraftAsync();
     }
 
-    private void RemoveLineButton_OnClick(object sender, RoutedEventArgs e)
+    private async void RemoveLineButton_OnClick(object sender, RoutedEventArgs e)
     {
         if (SelectedLine is null)
         {
@@ -233,18 +309,37 @@ public partial class InboundPage : Page, INotifyPropertyChanged
         Lines.Remove(SelectedLine);
         ResequenceLines();
         OnPropertyChanged(nameof(TotalsText));
+
+        if (_currentDocumentId.HasValue)
+        {
+            await SaveDraftAsync();
+        }
     }
 
-    private void PostDocumentButton_OnClick(object sender, RoutedEventArgs e)
+    private async void PostDocumentButton_OnClick(object sender, RoutedEventArgs e)
     {
         if (Lines.Count == 0)
         {
-            MessageBox.Show("Р”РѕР±Р°РІСЊ С…РѕС‚СЏ Р±С‹ РѕРґРЅСѓ СЃС‚СЂРѕРєСѓ РїРµСЂРµРґ РїСЂРѕРІРµРґРµРЅРёРµРј.", "РџСЂРёС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Добавь хотя бы одну строку перед проведением.", "Приход", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
-        DocumentStatus = "РџСЂРѕРІРµРґРµРЅ";
-        MessageBox.Show("UI-РґРµРјРѕ: РґРѕРєСѓРјРµРЅС‚ РїРѕРјРµС‡РµРЅ РєР°Рє РїСЂРѕРІРµРґРµРЅРЅС‹Р№. Р›РѕРіРёРєСѓ РїСЂРѕРІРµРґРµРЅРёСЏ РїРѕРґРєР»СЋС‡РёС‚ backend.", "РџСЂРёС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Information);
+        try
+        {
+            var document = await SaveDraftAsync();
+            var posted = await _stockService.PostDocumentAsync(document.Id);
+            if (posted is null)
+            {
+                return;
+            }
+
+            await ReloadAfterMutationAsync(posted.Id);
+            MessageBox.Show("Документ прихода проведен.", "Приход", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Приход", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private void RefreshDocuments()
@@ -285,48 +380,188 @@ public partial class InboundPage : Page, INotifyPropertyChanged
         OnPropertyChanged(nameof(HistorySummary));
     }
 
-    private void LoadDocumentLines(int documentId)
-    {
-        Lines.Clear();
-
-        List<DocumentLineItem> seed = documentId switch
-        {
-            1 =>
-            [
-                new DocumentLineItem { LineNo = 1, Sku = "MILK-1L", ProductName = "РњРѕР»РѕРєРѕ 1Р»", Quantity = 24, Unit = "С€С‚", Comment = "РџР°Р»Р»РµС‚ 1" },
-                new DocumentLineItem { LineNo = 2, Sku = "COF-250", ProductName = "РљРѕС„Рµ 250Рі", Quantity = 16, Unit = "С€С‚", Comment = "РЎРµРєС†РёСЏ B" },
-                new DocumentLineItem { LineNo = 3, Sku = "SUG-1KG", ProductName = "РЎР°С…Р°СЂ 1РєРі", Quantity = 56, Unit = "С€С‚", Comment = "РћСЃРЅРѕРІРЅРѕР№ Р·Р°РїР°СЃ" }
-            ],
-            2 =>
-            [
-                new DocumentLineItem { LineNo = 1, Sku = "SUG-1KG", ProductName = "РЎР°С…Р°СЂ 1РєРі", Quantity = 10, Unit = "С€С‚", Comment = "Р§РµСЂРЅРѕРІРёРє" },
-                new DocumentLineItem { LineNo = 2, Sku = "MILK-1L", ProductName = "РњРѕР»РѕРєРѕ 1Р»", Quantity = 24, Unit = "С€С‚", Comment = "Р”РѕРїРѕСЃС‚Р°РІРєР°" }
-            ],
-            _ =>
-            [
-                new DocumentLineItem { LineNo = 1, Sku = "COF-250", ProductName = "РљРѕС„Рµ 250Рі", Quantity = 12, Unit = "С€С‚", Comment = "РќРѕРІР°СЏ РїР°СЂС‚РёСЏ" }
-            ]
-        };
-
-        foreach (var line in seed)
-        {
-            Lines.Add(line);
-        }
-
-        OnPropertyChanged(nameof(TotalsText));
-    }
-
     private void NewDocument()
     {
+        _currentDocumentId = null;
+        _isRefreshingSelection = true;
         SelectedDocument = null;
+        _isRefreshingSelection = false;
         DocumentNumber = $"IN-{DateTime.Now:HHmmss}";
-        DocumentStatus = "Р§РµСЂРЅРѕРІРёРє";
+        DocumentStatus = "Черновик";
         DocumentComment = string.Empty;
         SelectedSupplier = Suppliers.FirstOrDefault();
         Lines.Clear();
-        OnPropertyChanged(nameof(EditorTitle));
+        SelectedLine = null;
         OnPropertyChanged(nameof(QueueHeadline));
         OnPropertyChanged(nameof(TotalsText));
+    }
+
+    private void ApplyDocument(StockDocumentDto document)
+    {
+        _currentDocumentId = document.Id;
+        DocumentNumber = document.Number;
+        DocumentStatus = MapStatus(document.Status);
+        DocumentComment = document.Comment ?? string.Empty;
+        SelectedSupplier = Suppliers.FirstOrDefault(x => x.Id == document.SupplierId) ?? Suppliers.FirstOrDefault();
+
+        Lines.Clear();
+        var lineNo = 1;
+        foreach (var line in document.Lines)
+        {
+            var product = Products.FirstOrDefault(x => x.Id == line.ProductId);
+            Lines.Add(new DocumentLineItem
+            {
+                LineNo = lineNo++,
+                Sku = line.ProductSku,
+                ProductName = line.ProductName,
+                Quantity = line.Quantity,
+                Unit = product?.Unit ?? "шт",
+                AvailableStock = product?.AvailableStock ?? 0,
+                Comment = line.Comment ?? string.Empty,
+                ValidationMessage = "OK"
+            });
+        }
+
+        OnPropertyChanged(nameof(QueueHeadline));
+        OnPropertyChanged(nameof(TotalsText));
+    }
+
+    private async Task<StockDocumentDto> SaveDraftAsync()
+    {
+        var requestLines = BuildRequestLines();
+        if (_currentDocumentId.HasValue)
+        {
+            var updated = await _stockService.UpdateDocumentAsync(_currentDocumentId.Value, new UpdateStockDocumentRequest
+            {
+                SupplierId = SelectedSupplier?.Id,
+                Comment = DocumentComment,
+                Lines = requestLines
+            });
+
+            if (updated is null)
+            {
+                throw new InvalidOperationException("Черновик документа не найден.");
+            }
+
+            DocumentNumber = updated.Number;
+            return updated;
+        }
+
+        var created = await _stockService.CreateDocumentAsync(new CreateStockDocumentRequest
+        {
+            Number = string.IsNullOrWhiteSpace(DocumentNumber) ? $"IN-{DateTime.Now:HHmmss}" : DocumentNumber.Trim(),
+            Type = StockDocumentType.Receipt,
+            SupplierId = SelectedSupplier?.Id,
+            Comment = DocumentComment,
+            Lines = requestLines
+        });
+
+        _currentDocumentId = created.Id;
+        DocumentNumber = created.Number;
+        DocumentStatus = MapStatus(created.Status);
+        await LoadDocumentsAsync();
+        SelectDocumentInQueue(created.Id);
+        return created;
+    }
+
+    private List<SaveStockDocumentLineRequest> BuildRequestLines()
+    {
+        var productMap = Products.ToDictionary(x => x.Sku, x => x.Id);
+        return Lines.Select(x => new SaveStockDocumentLineRequest
+        {
+            ProductId = productMap[x.Sku],
+            Quantity = x.Quantity,
+            UnitPrice = 0,
+            Comment = string.IsNullOrWhiteSpace(x.Comment) ? null : x.Comment.Trim()
+        }).ToList();
+    }
+
+    private async Task ReloadAfterMutationAsync(int? selectedDocumentId = null)
+    {
+        await LoadProductsAsync();
+        await LoadDocumentsAsync();
+        await LoadHistoryAsync();
+
+        if (selectedDocumentId.HasValue)
+        {
+            SelectDocumentInQueue(selectedDocumentId.Value);
+            var document = await _stockService.GetDocumentByIdAsync(selectedDocumentId.Value);
+            if (document is not null)
+            {
+                ApplyDocument(document);
+                return;
+            }
+        }
+
+        NewDocument();
+    }
+
+    private void SelectDocumentInQueue(int documentId)
+    {
+        var item = FilteredDocuments.FirstOrDefault(x => x.Id == documentId) ?? _allDocuments.FirstOrDefault(x => x.Id == documentId);
+        if (item is null)
+        {
+            return;
+        }
+
+        _isRefreshingSelection = true;
+        SelectedDocument = item;
+        _isRefreshingSelection = false;
+        OnPropertyChanged(nameof(QueueHeadline));
+    }
+
+    private static DocumentListItem MapDocumentListItem(StockDocumentDto document)
+    {
+        return new DocumentListItem
+        {
+            Id = document.Id,
+            Number = document.Number,
+            CounterpartyName = document.SupplierName ?? "Без поставщика",
+            Status = MapStatus(document.Status),
+            CreatedAt = document.CreatedAt.ToLocalTime(),
+            LinesCount = document.TotalItems,
+            TotalQuantity = document.TotalQuantity,
+            HasWarnings = false
+        };
+    }
+
+    private static MovementHistoryItem MapMovementHistoryItem(StockMovementDto movement)
+    {
+        return new MovementHistoryItem
+        {
+            OccurredAt = movement.CreatedAt.ToLocalTime(),
+            ProductName = movement.ProductName,
+            Sku = movement.ProductSku,
+            MovementType = MapMovementType(movement.Type),
+            DocumentNumber = movement.DocumentNumber ?? string.Empty,
+            Quantity = movement.Quantity,
+            BalanceAfter = movement.BalanceAfter,
+            Comment = movement.Comment ?? string.Empty
+        };
+    }
+
+    private static string MapStatus(StockDocumentStatus status) => status switch
+    {
+        StockDocumentStatus.Draft => "Черновик",
+        StockDocumentStatus.Posted => "Проведен",
+        StockDocumentStatus.Cancelled => "Отменен",
+        _ => status.ToString()
+    };
+
+    private static string MapMovementType(StockMovementType type) => type switch
+    {
+        StockMovementType.Receipt => "Приход",
+        StockMovementType.Issue => "Расход",
+        StockMovementType.Reservation => "Резерв",
+        StockMovementType.ReservationRelease => "Снятие резерва",
+        StockMovementType.Adjustment => "Корректировка",
+        _ => type.ToString()
+    };
+
+    private static bool TryParseDecimal(string? text, out decimal value)
+    {
+        return decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out value)
+            || decimal.TryParse(text, NumberStyles.Any, CultureInfo.GetCultureInfo("ru-RU"), out value);
     }
 
     private void ResequenceLines()

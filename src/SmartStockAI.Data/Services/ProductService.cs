@@ -51,6 +51,7 @@ public sealed class ProductService(AppDbContext dbContext) : IProductService
             LocationId = request.LocationId,
             Unit = normalizedUnit,
             CurrentStock = request.CurrentStock,
+            ReservedStock = 0,
             MinStock = request.MinStock,
             PurchasePrice = request.PurchasePrice,
             SalePrice = request.SalePrice
@@ -113,6 +114,18 @@ public sealed class ProductService(AppDbContext dbContext) : IProductService
         if (hasMovements)
         {
             throw new InvalidOperationException("Cannot delete product that already has stock movements.");
+        }
+
+        var hasDraftDocuments = await dbContext.StockDocumentLines.AnyAsync(x => x.ProductId == id, cancellationToken);
+        if (hasDraftDocuments)
+        {
+            throw new InvalidOperationException("Cannot delete product that is used by stock documents.");
+        }
+
+        var hasReservations = await dbContext.StockReservations.AnyAsync(x => x.ProductId == id && !x.IsReleased, cancellationToken);
+        if (hasReservations)
+        {
+            throw new InvalidOperationException("Cannot delete product that has active reservations.");
         }
 
         dbContext.Products.Remove(entity);
@@ -183,6 +196,8 @@ public sealed class ProductService(AppDbContext dbContext) : IProductService
             LocationName = product.Location != null ? product.Location.Name : null,
             Unit = product.Unit,
             CurrentStock = product.CurrentStock,
+            ReservedStock = product.ReservedStock,
+            AvailableStock = product.CurrentStock - product.ReservedStock,
             MinStock = product.MinStock,
             PurchasePrice = product.PurchasePrice,
             SalePrice = product.SalePrice
