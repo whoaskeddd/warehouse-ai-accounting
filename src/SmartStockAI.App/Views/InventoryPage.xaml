@@ -17,14 +17,13 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel>
-                        <TextBlock Text="STOCK CONTROL"
-                                   Style="{StaticResource SectionEyebrowTextStyle}" />
+                        <TextBlock
+                                   Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="КОНТРОЛЬ ЗАПАСОВ"/></TextBlock>
                         <TextBlock Margin="0,10,0,0"
                                    Text="Инвентаризация"
                                    Style="{StaticResource PageTitleTextStyle}" />
                         <TextBlock Margin="0,8,0,0"
-                                   Text="Экран шага 4: пересчет остатков, акт расхождений и фиксация ручных комментариев по результатам проверки."
-                                   Style="{StaticResource PageDescriptionTextStyle}" />
+                                   Style="{StaticResource PageDescriptionTextStyle}" ><Run Language="ru-ru" Text="П"/><Run Text="ересчет остатков, акт расхождений и фиксация ручных комментариев по результатам проверки."/></TextBlock>
                     </StackPanel>
 
                     <Grid Grid.Row="1"

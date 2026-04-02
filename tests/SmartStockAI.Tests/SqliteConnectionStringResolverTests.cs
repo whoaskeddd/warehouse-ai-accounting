@@ -9,10 +9,12 @@ public class SqliteConnectionStringResolverTests
     public void Resolve_ShouldConvertRelativeDatabasePathToSolutionRootAbsolutePath()
     {
         var connectionString = SqliteConnectionStringResolver.Resolve("Data Source=smartstockai.db");
+        var resolvedPath = new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(connectionString).DataSource;
 
         connectionString.Should().Contain("Data Source=");
-        connectionString.Should().Contain(Path.Combine("warehouseAIaccounting", "smartstockai.db"));
-        Path.IsPathRooted(new Microsoft.Data.Sqlite.SqliteConnectionStringBuilder(connectionString).DataSource)
+        Path.GetFileName(resolvedPath).Should().Be("smartstockai.db");
+        Path.GetDirectoryName(resolvedPath).Should().Be(SqliteConnectionStringResolver.GetDatabaseBasePath());
+        Path.IsPathRooted(resolvedPath)
             .Should()
             .BeTrue();
     }

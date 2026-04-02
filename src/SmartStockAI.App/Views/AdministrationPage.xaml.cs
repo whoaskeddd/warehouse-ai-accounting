@@ -4,36 +4,28 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using SmartStockAI.App.Models;
-using SmartStockAI.App.Services;
-using SmartStockAI.Core.Contracts.Stock;
+using SmartStockAI.Core.Contracts.Audit;
+using SmartStockAI.Core.Contracts.Backup;
 
 namespace SmartStockAI.App.Views;
 
 public partial class AdministrationPage : Page, INotifyPropertyChanged
 {
-    private readonly BackupWorkspaceService _backupWorkspace;
-    private readonly AuditTrailService _auditTrail;
-    private readonly AppSessionService _appSession;
-    private readonly IStockService _stockService;
-    private string _backupComment = "Перед изменениями в справочниках";
+    private readonly IBackupService _backupService;
+    private readonly IAuditService _auditService;
+    private string _backupComment = "Manual backup before critical changes";
     private string _auditFilterText = string.Empty;
     private BackupSnapshotItem? _selectedBackup;
 
-    public AdministrationPage(
-        BackupWorkspaceService backupWorkspace,
-        AuditTrailService auditTrail,
-        AppSessionService appSession,
-        IStockService stockService)
+    public AdministrationPage(IBackupService backupService, IAuditService auditService)
     {
-        _backupWorkspace = backupWorkspace;
-        _auditTrail = auditTrail;
-        _appSession = appSession;
-        _stockService = stockService;
+        _backupService = backupService;
+        _auditService = auditService;
 
         InitializeComponent();
         DataContext = this;
 
-        Backups = _backupWorkspace.Snapshots;
+        Backups = [];
         FilteredEntries = [];
 
         Loaded += OnLoaded;
@@ -64,58 +56,123 @@ public partial class AdministrationPage : Page, INotifyPropertyChanged
         {
             if (SetField(ref _auditFilterText, value))
             {
-                RefreshAuditEntries();
+                RefreshAuditEntries(_cachedAuditEntries);
             }
         }
     }
 
-    public string BackupTitle => Backups.Count == 0 ? "Резервных копий пока нет" : "Управление резервными копиями";
+    public string BackupTitle => Backups.Count == 0 ? "No backups yet" : "Backup management";
 
-    public string BackupSummary => $"{Backups.Count} backup-файлов в рабочем списке";
+    public string BackupSummary => $"{Backups.Count} backup files";
 
-    public string AuditSummary => $"{FilteredEntries.Count} записей";
+    public string AuditSummary => $"{FilteredEntries.Count} records";
+
+    private IReadOnlyList<AuditLogItem> _cachedAuditEntries = [];
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         Loaded -= OnLoaded;
-        var movements = await _stockService.GetMovementsAsync();
-        _auditTrail.EnsureSeeded(movements);
-        RefreshAuditEntries();
-        OnPropertyChanged(nameof(BackupTitle));
-        OnPropertyChanged(nameof(BackupSummary));
+        await ReloadAsync();
     }
 
-    private void CreateBackupButton_OnClick(object sender, RoutedEventArgs e)
+    private async Task ReloadAsync()
     {
-        var actor = _appSession.CurrentUser?.DisplayName ?? "Локальный оператор";
-        var snapshot = _backupWorkspace.CreateSnapshot(actor, BackupComment);
-        SelectedBackup = snapshot;
+        try
+        {
+            var backups = await _backupService.GetAllAsync();
+            var auditEntries = await _auditService.GetAllAsync();
 
-        _auditTrail.Add(actor, "Создание backup", snapshot.Name, snapshot.Comment);
-        RefreshAuditEntries();
-        OnPropertyChanged(nameof(BackupTitle));
-        OnPropertyChanged(nameof(BackupSummary));
+            Backups.Clear();
+            foreach (var backup in backups)
+            {
+                Backups.Add(new BackupSnapshotItem
+                {
+                    Id = backup.Id,
+                    Name = backup.FileName,
+                    FullPath = backup.FullPath,
+                    CreatedAt = backup.CreatedAtUtc.ToLocalTime(),
+                    CreatedBy = backup.CreatedByUserDisplayName,
+                    Status = backup.RestoredAtUtc.HasValue ? "Restored" : "Ready"
+                });
+            }
+
+            _cachedAuditEntries = auditEntries
+                .Select(x => new AuditLogItem
+                {
+                    Id = x.Id,
+                    OccurredAt = x.CreatedAtUtc.ToLocalTime(),
+                    Actor = x.UserDisplayName ?? "System",
+                    Action = x.ActionType,
+                    Target = string.IsNullOrWhiteSpace(x.EntityId) ? x.EntityType : $"{x.EntityType} #{x.EntityId}",
+                    Details = x.Details,
+                    Severity = GetSeverity(x.ActionType)
+                })
+                .ToList();
+
+            RefreshAuditEntries(_cachedAuditEntries);
+            SelectedBackup = Backups.FirstOrDefault();
+            OnPropertyChanged(nameof(BackupTitle));
+            OnPropertyChanged(nameof(BackupSummary));
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Administration", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
-    private void RestoreBackupButton_OnClick(object sender, RoutedEventArgs e)
+    private async void CreateBackupButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            await _backupService.CreateBackupAsync();
+            await ReloadAsync();
+
+            if (!string.IsNullOrWhiteSpace(BackupComment))
+            {
+                MessageBox.Show(
+                    "Backup created. Note: the backend contract does not persist custom backup comments yet.",
+                    "Administration",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Administration", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async void RestoreBackupButton_OnClick(object sender, RoutedEventArgs e)
     {
         if (SelectedBackup is null)
         {
-            MessageBox.Show("Выбери backup для восстановления.", "Администрирование", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Select a backup first.", "Administration", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
-        _backupWorkspace.RestoreSnapshot(SelectedBackup);
-        var actor = _appSession.CurrentUser?.DisplayName ?? "Локальный оператор";
-        _auditTrail.Add(actor, "Восстановление backup", SelectedBackup.Name, "UI-подтверждение восстановления выполнено.", "Warning");
+        if (MessageBox.Show(
+                $"Restore backup {SelectedBackup.Name}?",
+                "Administration",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question) != MessageBoxResult.Yes)
+        {
+            return;
+        }
 
-        RefreshAuditEntries();
-        OnPropertyChanged(nameof(BackupSummary));
+        try
+        {
+            await _backupService.RestoreBackupAsync(SelectedBackup.Id);
+            await ReloadAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(ex.Message, "Administration", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
-    private void RefreshAuditEntries()
+    private void RefreshAuditEntries(IReadOnlyList<AuditLogItem> source)
     {
-        var filtered = _auditTrail.Entries
+        var filtered = source
             .Where(x => string.IsNullOrWhiteSpace(AuditFilterText)
                 || x.Actor.Contains(AuditFilterText, StringComparison.OrdinalIgnoreCase)
                 || x.Action.Contains(AuditFilterText, StringComparison.OrdinalIgnoreCase)
@@ -131,6 +188,17 @@ public partial class AdministrationPage : Page, INotifyPropertyChanged
         }
 
         OnPropertyChanged(nameof(AuditSummary));
+    }
+
+    private static string GetSeverity(string actionType)
+    {
+        if (actionType.Contains("Deleted", StringComparison.OrdinalIgnoreCase)
+            || actionType.Contains("Restored", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Warning";
+        }
+
+        return "Info";
     }
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

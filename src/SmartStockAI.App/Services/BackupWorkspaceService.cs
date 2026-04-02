@@ -11,11 +11,12 @@ public sealed class BackupWorkspaceService
     {
         var snapshot = new BackupSnapshotItem
         {
+            Id = 0,
             Name = $"backup-{DateTime.Now:yyyyMMdd-HHmmss}.zip",
+            FullPath = string.IsNullOrWhiteSpace(comment) ? string.Empty : comment.Trim(),
             CreatedAt = DateTime.Now,
             CreatedBy = actor,
-            Comment = string.IsNullOrWhiteSpace(comment) ? "Ручной backup из UI" : comment.Trim(),
-            Status = "Готов"
+            Status = "Ready"
         };
 
         Snapshots.Insert(0, snapshot);
@@ -30,7 +31,7 @@ public sealed class BackupWorkspaceService
             return null;
         }
 
-        snapshot.Status = "Восстановлен";
+        snapshot.Status = "Restored";
         return snapshot;
     }
 

@@ -17,14 +17,13 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel>
-                        <TextBlock Text="ADMIN TOOLS"
-                                   Style="{StaticResource SectionEyebrowTextStyle}" />
+                        <TextBlock
+                                   Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="ИНСТРУМЕНТЫ УПРАВЛЕНИЯ"/></TextBlock>
                         <TextBlock Margin="0,10,0,0"
                                    Text="Backup и журнал действий"
                                    Style="{StaticResource PageTitleTextStyle}" />
                         <TextBlock Margin="0,8,0,0"
-                                   Text="UI-слой для административных сценариев шага 4: ручной backup/restore и упрощенный журнал ключевых операций."
-                                   Style="{StaticResource PageDescriptionTextStyle}" />
+                                   Style="{StaticResource PageDescriptionTextStyle}" ><Run Language="ru-ru" Text="Страница для "/><Run Text="административных с"/><Run Language="ru-ru" Text="ценариев:"/><Run Text="ручной backup/restore и журнал ключевых операций."/></TextBlock>
                     </StackPanel>
 
                     <Grid Grid.Row="1"
@@ -51,18 +50,17 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel>
-                                        <TextBlock Text="Backup workspace"
+                                        <TextBlock
                                                    Style="{StaticResource CardCaptionTextStyle}" />
-                                        <TextBlock Margin="0,8,0,0"
-                                                   Text="{Binding BackupTitle}"
+                                        <TextBlock Margin="0,3,0,0"
                                                    Style="{StaticResource PageTitleTextStyle}"
-                                                   FontSize="24" />
+                                                   FontSize="24" ><Run Language="ru-ru"/></TextBlock>
                                     </StackPanel>
 
-                                    <Button Grid.Column="1"
+                                    <Button
                                             Content="Создать backup"
                                             Click="CreateBackupButton_OnClick"
-                                            Style="{StaticResource PrimaryButtonStyle}" />
+                                            Style="{StaticResource PrimaryButtonStyle}" Margin="-6,0,0,0" />
                                 </Grid>
 
                                 <TextBox x:Name="BackupCommentTextBox"
@@ -147,11 +145,6 @@
                                                    Style="{StaticResource PageTitleTextStyle}"
                                                    FontSize="24" />
                                     </StackPanel>
-
-                                    <Border Grid.Column="1"
-                                            Style="{StaticResource PillBadgeStyle}">
-                                        <TextBlock Text="{Binding AuditSummary}" />
-                                    </Border>
                                 </Grid>
 
                                 <TextBox Grid.Row="1"

@@ -14,19 +14,19 @@ public partial class UsersPage : Page, INotifyPropertyChanged
 {
     private readonly IUserService _userService;
     private readonly AppSessionService _appSession;
-    private readonly AuditTrailService _auditTrail;
     private UserDto? _selectedUser;
     private UserDto? _sessionSelectedUser;
     private LookupItem? _selectedRoleOption;
     private string _editorLogin = string.Empty;
     private string _editorDisplayName = string.Empty;
+    private string _editorPassword = string.Empty;
+    private bool _editorIsActive = true;
     private int? _editingUserId;
 
-    public UsersPage(IUserService userService, AppSessionService appSession, AuditTrailService auditTrail)
+    public UsersPage(IUserService userService, AppSessionService appSession)
     {
         _userService = userService;
         _appSession = appSession;
-        _auditTrail = auditTrail;
 
         InitializeComponent();
         DataContext = this;
@@ -34,9 +34,9 @@ public partial class UsersPage : Page, INotifyPropertyChanged
         Users = [];
         RoleOptions =
         [
-            new LookupItem { Id = (int)UserRole.Admin, Name = "Администратор" },
-            new LookupItem { Id = (int)UserRole.WarehouseOperator, Name = "Кладовщик" },
-            new LookupItem { Id = (int)UserRole.Manager, Name = "Менеджер" }
+            new LookupItem { Id = (int)UserRole.Admin, Name = "Administrator" },
+            new LookupItem { Id = (int)UserRole.WarehouseOperator, Name = "Warehouse Operator" },
+            new LookupItem { Id = (int)UserRole.Manager, Name = "Manager" }
         ];
 
         _appSession.CurrentUserChanged += AppSession_OnCurrentUserChanged;
@@ -97,19 +97,33 @@ public partial class UsersPage : Page, INotifyPropertyChanged
         set => SetField(ref _editorDisplayName, value);
     }
 
+    public string EditorPassword
+    {
+        get => _editorPassword;
+        set => SetField(ref _editorPassword, value);
+    }
+
+    public bool EditorIsActive
+    {
+        get => _editorIsActive;
+        set => SetField(ref _editorIsActive, value);
+    }
+
     public string CurrentUserDisplay => _appSession.CurrentUserDisplayName;
 
     public string SessionRoleLabel =>
-        SessionSelectedUser is null ? "Роль не выбрана" : MapRole(SessionSelectedUser.Role);
+        SessionSelectedUser is null ? "Role not selected" : MapRole(SessionSelectedUser.Role);
 
-    public string EditorTitle => _editingUserId.HasValue ? "Редактирование" : "Новый пользователь";
+    public string EditorTitle => _editingUserId.HasValue ? "Edit user" : "New user";
+
+    public string PasswordCaption => _editingUserId.HasValue ? "Password (leave blank to keep current)" : "Password";
 
     public string SelectedRoleDescription => SelectedRoleOption?.Id switch
     {
-        (int)UserRole.Admin => "Полный доступ к настройкам, справочникам, документам и административным операциям.",
-        (int)UserRole.WarehouseOperator => "Работа со складом: приход, расход, инвентаризация и проверка расхождений.",
-        (int)UserRole.Manager => "Просмотр ключевых данных, отчетов и пользовательских сценариев без критичных изменений.",
-        _ => "Выбери роль, чтобы увидеть краткое описание прав."
+        (int)UserRole.Admin => "Full administrative access. Creating a second admin is blocked by backend rules.",
+        (int)UserRole.WarehouseOperator => "Warehouse operations, stock documents and inventory sessions.",
+        (int)UserRole.Manager => "Read-oriented role for analytics and dashboards.",
+        _ => "Select a role to view its access scope."
     };
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
@@ -127,16 +141,16 @@ public partial class UsersPage : Page, INotifyPropertyChanged
     {
         if (SessionSelectedUser is null)
         {
-            MessageBox.Show("Выбери пользователя для входа.", "Пользователи", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Select a user first.", "Users", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
-        _appSession.SetCurrentUser(SessionSelectedUser);
-        _auditTrail.Add(
-            SessionSelectedUser.DisplayName,
-            "Смена активного пользователя",
-            SessionSelectedUser.Login,
-            $"Роль: {MapRole(SessionSelectedUser.Role)}");
+        SelectedUser = SessionSelectedUser;
+        MessageBox.Show(
+            "Backend authentication in step 4 is fixed to the current logged-in user. This selector now opens the user in the editor only.",
+            "Users",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
 
     private void NewUserButton_OnClick(object sender, RoutedEventArgs e)
@@ -149,11 +163,16 @@ public partial class UsersPage : Page, INotifyPropertyChanged
     {
         if (string.IsNullOrWhiteSpace(EditorLogin) || string.IsNullOrWhiteSpace(EditorDisplayName) || SelectedRoleOption?.Id is not int roleValue)
         {
-            MessageBox.Show("Заполни логин, имя и роль пользователя.", "Пользователи", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Login, display name and role are required.", "Users", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         var isEditing = _editingUserId.HasValue;
+        if (!isEditing && string.IsNullOrWhiteSpace(EditorPassword))
+        {
+            MessageBox.Show("Password is required for a new user.", "Users", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
 
         try
         {
@@ -164,7 +183,9 @@ public partial class UsersPage : Page, INotifyPropertyChanged
                 {
                     Login = EditorLogin.Trim(),
                     DisplayName = EditorDisplayName.Trim(),
-                    Role = (UserRole)roleValue
+                    Password = string.IsNullOrWhiteSpace(EditorPassword) ? null : EditorPassword,
+                    Role = (UserRole)roleValue,
+                    IsActive = EditorIsActive
                 });
             }
             else
@@ -173,21 +194,17 @@ public partial class UsersPage : Page, INotifyPropertyChanged
                 {
                     Login = EditorLogin.Trim(),
                     DisplayName = EditorDisplayName.Trim(),
-                    Role = (UserRole)roleValue
+                    Password = EditorPassword,
+                    Role = (UserRole)roleValue,
+                    IsActive = EditorIsActive
                 });
             }
 
             await ReloadAsync(user?.Id);
-            var actor = _appSession.CurrentUser?.DisplayName ?? "Локальный оператор";
-            _auditTrail.Add(
-                actor,
-                isEditing ? "Изменение пользователя" : "Создание пользователя",
-                EditorLogin.Trim(),
-                $"Имя: {EditorDisplayName.Trim()}, роль: {MapRole((UserRole)roleValue)}");
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Пользователи", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Users", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -199,8 +216,8 @@ public partial class UsersPage : Page, INotifyPropertyChanged
         }
 
         if (MessageBox.Show(
-                $"Удалить пользователя {SelectedUser.DisplayName}?",
-                "Пользователи",
+                $"Delete user {SelectedUser.DisplayName}?",
+                "Users",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question) != MessageBoxResult.Yes)
         {
@@ -215,19 +232,11 @@ public partial class UsersPage : Page, INotifyPropertyChanged
                 return;
             }
 
-            var actor = _appSession.CurrentUser?.DisplayName ?? "Локальный оператор";
-            _auditTrail.Add(actor, "Удаление пользователя", SelectedUser.Login, $"Удален пользователь {SelectedUser.DisplayName}.", "Warning");
-
-            if (_appSession.CurrentUser?.Id == SelectedUser.Id)
-            {
-                _appSession.SetCurrentUser(null);
-            }
-
             await ReloadAsync();
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Пользователи", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Users", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -241,20 +250,13 @@ public partial class UsersPage : Page, INotifyPropertyChanged
             Users.Add(user);
         }
 
-        SessionSelectedUser = selectedUserId.HasValue
-            ? Users.FirstOrDefault(x => x.Id == selectedUserId.Value)
-            : _appSession.CurrentUser is null
-                ? Users.FirstOrDefault()
-                : Users.FirstOrDefault(x => x.Id == _appSession.CurrentUser.Id);
-
-        if (_appSession.CurrentUser is null && SessionSelectedUser is not null)
-        {
-            _appSession.SetCurrentUser(SessionSelectedUser);
-        }
+        SessionSelectedUser = _appSession.CurrentUser is null
+            ? Users.FirstOrDefault()
+            : Users.FirstOrDefault(x => x.Id == _appSession.CurrentUser.Id) ?? Users.FirstOrDefault();
 
         SelectedUser = selectedUserId.HasValue
             ? Users.FirstOrDefault(x => x.Id == selectedUserId.Value)
-            : Users.FirstOrDefault();
+            : SessionSelectedUser ?? Users.FirstOrDefault();
 
         if (SelectedUser is null)
         {
@@ -276,8 +278,11 @@ public partial class UsersPage : Page, INotifyPropertyChanged
         _editingUserId = user.Id;
         EditorLogin = user.Login;
         EditorDisplayName = user.DisplayName;
+        EditorPassword = string.Empty;
+        EditorIsActive = user.IsActive;
         SelectedRoleOption = RoleOptions.FirstOrDefault(x => x.Id == (int)user.Role);
         OnPropertyChanged(nameof(EditorTitle));
+        OnPropertyChanged(nameof(PasswordCaption));
     }
 
     private void ResetEditor()
@@ -285,20 +290,25 @@ public partial class UsersPage : Page, INotifyPropertyChanged
         _editingUserId = null;
         EditorLogin = string.Empty;
         EditorDisplayName = string.Empty;
-        SelectedRoleOption = RoleOptions.FirstOrDefault();
+        EditorPassword = string.Empty;
+        EditorIsActive = true;
+        SelectedRoleOption = RoleOptions.FirstOrDefault(x => x.Id == (int)UserRole.WarehouseOperator) ?? RoleOptions.FirstOrDefault();
         OnPropertyChanged(nameof(EditorTitle));
+        OnPropertyChanged(nameof(PasswordCaption));
     }
 
     private void AppSession_OnCurrentUserChanged(object? sender, EventArgs e)
     {
         OnPropertyChanged(nameof(CurrentUserDisplay));
+        SessionSelectedUser = _appSession.CurrentUser;
+        OnPropertyChanged(nameof(SessionRoleLabel));
     }
 
     private static string MapRole(UserRole role) => role switch
     {
-        UserRole.Admin => "Администратор",
-        UserRole.WarehouseOperator => "Кладовщик",
-        UserRole.Manager => "Менеджер",
+        UserRole.Admin => "Administrator",
+        UserRole.WarehouseOperator => "Warehouse Operator",
+        UserRole.Manager => "Manager",
         _ => role.ToString()
     };
 
