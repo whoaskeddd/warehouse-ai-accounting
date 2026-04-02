@@ -16,9 +16,9 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel>
-                        <TextBlock Text="STRUCTURE" Style="{StaticResource SectionEyebrowTextStyle}" />
+                        <TextBlock Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="СТРУКТУРА"/></TextBlock>
                         <TextBlock Margin="0,10,0,0" Text="Категории" Style="{StaticResource PageTitleTextStyle}" />
-                        <TextBlock Margin="0,8,0,0" Text="Базовый экран категорий для шага 2: список, родительская категория и сохранение." Style="{StaticResource PageDescriptionTextStyle}" />
+                        <TextBlock Margin="0,8,0,0" Style="{StaticResource PageDescriptionTextStyle}" ><Run Language="ru-ru" Text="Добавление родительский и дочерных категорий."/></TextBlock>
                     </StackPanel>
 
                     <Grid Grid.Row="1" Margin="0,26,0,0">

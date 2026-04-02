@@ -10,15 +10,14 @@
     <Grid Margin="0,0,0,8">
         <Border Style="{StaticResource PageContainerStyle}">
             <StackPanel>
-                <TextBlock Text="INSIGHTS"
-                           Style="{StaticResource SectionEyebrowTextStyle}" />
-                <TextBlock Margin="0,10,0,0"
+                    <TextBlock
+                           Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="АНАЛИТИКА"/></TextBlock>
+                    <TextBlock Margin="0,10,0,0"
                            Text="Отчеты"
                            Style="{StaticResource PageTitleTextStyle}" />
-                <TextBlock Margin="0,8,0,0"
-                           Text="Визуально лёгкий центр аналитики с акцентом на табличный preview и понятный экспорт."
-                           Style="{StaticResource PageDescriptionTextStyle}" />
-                <StackPanel Margin="0,18,0,0"
+                    <TextBlock Margin="0,8,0,0"
+                           Style="{StaticResource PageDescriptionTextStyle}" ><Run Language="ru-ru" Text="Ц"/><Run Text="ентр аналитики с акцентом на табличный preview и понятный экспорт."/></TextBlock>
+                    <StackPanel Margin="0,18,0,0"
                             Orientation="Horizontal">
                     <Button Content="Открыть отчеты"
                             Style="{StaticResource PrimaryButtonStyle}" />

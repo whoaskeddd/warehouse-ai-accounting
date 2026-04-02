@@ -41,13 +41,13 @@
             <DockPanel Margin="22">
                 <StackPanel DockPanel.Dock="Top"
                             Margin="0,0,0,28">
-                    <TextBlock Text="WAREHOUSE AI"
-                               Style="{StaticResource SectionEyebrowTextStyle}" />
-                    <TextBlock Text="SmartStock AI"
-                               Style="{StaticResource AppTitleTextStyle}" />
+                    <TextBlock
+                               Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="Склад ИИ"/></TextBlock>
+                    <TextBlock
+                               Style="{StaticResource AppTitleTextStyle}" Width="225" ><Run Language="ru-ru" Text="Умный склад ИИ"/></TextBlock>
                     <TextBlock Margin="0,6,0,0"
                                MaxWidth="228"
-                               Style="{StaticResource AppSubtitleTextStyle}" ><Run Language="ru-ru" Text="Абрамов Смелов "/></TextBlock>
+                               Style="{StaticResource AppSubtitleTextStyle}" ><Run Text="Абрамов Смелов "/><Run Language="ru-ru" Text="Шарапов"/></TextBlock>
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom"
@@ -68,6 +68,7 @@
                                        Style="{StaticResource PageDescriptionTextStyle}" />
                             <Button Margin="0,18,0,0"
                                     Content="Открыть товары"
+                                    Click="OpenProductsButton_OnClick"
                                     Style="{StaticResource PrimaryButtonStyle}" />
                         </StackPanel>
                     </Border>

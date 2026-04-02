@@ -16,7 +16,7 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel>
-                        <TextBlock Text="STORAGE MAP" Style="{StaticResource SectionEyebrowTextStyle}" />
+                        <TextBlock Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="КАРТА СКЛАДА"/></TextBlock>
                         <TextBlock Margin="0,10,0,0" Text="Локации" Style="{StaticResource PageTitleTextStyle}" />
                         <TextBlock Margin="0,8,0,0" Text="Базовая иерархия мест хранения: список, родительская локация и быстрый редактор." Style="{StaticResource PageDescriptionTextStyle}" />
                     </StackPanel>

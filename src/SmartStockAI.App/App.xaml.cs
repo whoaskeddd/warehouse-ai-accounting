@@ -10,6 +10,9 @@ using SmartStockAI.Core.Contracts.Suppliers;
 using SmartStockAI.Data.Context;
 using SmartStockAI.Data.Services;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace SmartStockAI.App;
 
@@ -23,6 +26,12 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        EventManager.RegisterClassHandler(
+            typeof(DataGrid),
+            UIElement.PreviewMouseWheelEvent,
+            new MouseWheelEventHandler(HandleDataGridPreviewMouseWheel),
+            handledEventsToo: true);
 
         _host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration(configuration =>
@@ -72,5 +81,44 @@ public partial class App : Application
         }
 
         base.OnExit(e);
+    }
+
+    private static void HandleDataGridPreviewMouseWheel(object sender, MouseWheelEventArgs e)
+    {
+        if (sender is not DataGrid dataGrid)
+        {
+            return;
+        }
+
+        var parentScrollViewer = FindAncestor<ScrollViewer>(dataGrid);
+        if (parentScrollViewer is null)
+        {
+            return;
+        }
+
+        e.Handled = true;
+        var forwardedEvent = new MouseWheelEventArgs(e.MouseDevice, e.Timestamp, e.Delta)
+        {
+            RoutedEvent = UIElement.MouseWheelEvent,
+            Source = dataGrid
+        };
+
+        parentScrollViewer.RaiseEvent(forwardedEvent);
+    }
+
+    private static T? FindAncestor<T>(DependencyObject? child) where T : DependencyObject
+    {
+        var current = VisualTreeHelper.GetParent(child);
+        while (current is not null)
+        {
+            if (current is T target)
+            {
+                return target;
+            }
+
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return null;
     }
 }

@@ -53,14 +53,19 @@
                       Style="{StaticResource AppDataGridStyle}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Документ"
+                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding Number}" />
                     <DataGridTextColumn Header="Контрагент"
+                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding CounterpartyName}" />
                     <DataGridTextColumn Header="Статус"
+                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding Status}" />
                     <DataGridTextColumn Header="Строк"
+                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding LinesCount}" />
                     <DataGridTextColumn Header="Кол-во"
+                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding TotalQuantity}" />
                 </DataGrid.Columns>
             </DataGrid>
