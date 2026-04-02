@@ -7,3 +7,4 @@ public sealed class LookupItem
 
     public override string ToString() => Name;
 }
+

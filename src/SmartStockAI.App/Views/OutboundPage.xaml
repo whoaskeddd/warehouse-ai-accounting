@@ -3,30 +3,305 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:controls="clr-namespace:SmartStockAI.App.Controls"
       mc:Ignorable="d"
       Background="Transparent"
       Title="Расход">
     <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
-    <Grid Margin="0,0,0,8">
-        <Border Style="{StaticResource PageContainerStyle}">
-            <StackPanel>
-                <TextBlock Text="DOCUMENT FLOW"
-                           Style="{StaticResource SectionEyebrowTextStyle}" />
-                <TextBlock Margin="0,10,0,0"
-                           Text="Расход"
-                           Style="{StaticResource PageTitleTextStyle}" />
-                <TextBlock Margin="0,8,0,0"
-                           Text="Здесь появится спокойный экран расхода с заметными предупреждениями о нехватке и читаемым составом документа."
-                           Style="{StaticResource PageDescriptionTextStyle}" />
-                <Button Margin="0,18,0,0"
-                        HorizontalAlignment="Left"
-                        Content="Новый расход"
-                        Style="{StaticResource PrimaryButtonStyle}" />
-                <TextBlock Margin="0,28,0,0"
-                           Text="Пустой экран расхода."
-                           Style="{StaticResource PlaceholderTextStyle}" />
-            </StackPanel>
-        </Border>
-    </Grid>
+        <Grid Margin="0,0,0,8">
+            <Border Style="{StaticResource PageContainerStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="DOCUMENT FLOW"
+                                   Style="{StaticResource SectionEyebrowTextStyle}" />
+                        <TextBlock Margin="0,10,0,0"
+                                   Text="Расходные накладные"
+                                   Style="{StaticResource PageTitleTextStyle}" />
+                        <TextBlock Margin="0,8,0,0"
+                                   Text="UI для расхода с контролем остатков: редактор документа, предупреждения по нехватке, список строк и история движения по SKU."
+                                   Style="{StaticResource PageDescriptionTextStyle}" />
+                    </StackPanel>
+
+                    <Border Grid.Row="1"
+                            Margin="0,20,0,0"
+                            Padding="18,14"
+                            Background="#FFFDF2F2"
+                            BorderBrush="#FFF5C2C7"
+                            BorderThickness="1"
+                            CornerRadius="16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Контроль нехватки"
+                                           Foreground="#FFB42318"
+                                           FontWeight="SemiBold"
+                                           FontSize="13" />
+                                <TextBlock Margin="0,6,0,0"
+                                           Text="{Binding ShortageSummary}"
+                                           Foreground="{StaticResource TextSecondaryBrush}"
+                                           TextWrapping="Wrap" />
+                            </StackPanel>
+                            <Border Grid.Column="1"
+                                    Style="{StaticResource PillBadgeStyle}"
+                                    Background="#FFFEE4E2"
+                                    BorderBrush="#FFFECACA">
+                                <TextBlock Text="{Binding WarningBadgeText}"
+                                           Foreground="#FFB42318" />
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <Grid Grid.Row="2"
+                          Margin="0,22,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.05*" />
+                            <ColumnDefinition Width="22" />
+                            <ColumnDefinition Width="1.8*" />
+                        </Grid.ColumnDefinitions>
+
+                        <controls:DocumentQueueControl Grid.Column="0"
+                                                       Title="Очередь расходов"
+                                                       SelectedDocumentTitle="{Binding QueueHeadline}"
+                                                       SummaryText="{Binding QueueSummary}"
+                                                       SearchText="{Binding DocumentFilterText, UpdateSourceTrigger=PropertyChanged}"
+                                                       ItemsSource="{Binding FilteredDocuments}"
+                                                       SelectedItem="{Binding SelectedDocument, Mode=TwoWay}" />
+
+                        <Border Grid.Column="2"
+                                Style="{StaticResource PanelCardStyle}"
+                                Margin="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Редактор расхода"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBlock Margin="0,8,0,0"
+                                                   Text="{Binding EditorTitle}"
+                                                   Style="{StaticResource PageTitleTextStyle}"
+                                                   FontSize="24" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Right">
+                                        <Button Content="Новый документ"
+                                                Click="NewDocumentButton_OnClick"
+                                                Style="{StaticResource SecondaryButtonStyle}" />
+                                        <Button Margin="12,0,0,0"
+                                                Content="Провести расход"
+                                                Click="PostDocumentButton_OnClick"
+                                                Style="{StaticResource PrimaryButtonStyle}" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Grid.Row="1"
+                                      Margin="0,22,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="220" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Margin="0,0,12,0">
+                                        <TextBlock Text="Номер"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBox x:Name="DocumentNumberTextBox"
+                                                 Margin="0,6,0,0"
+                                                 Text="{Binding DocumentNumber, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource AppTextBoxStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1"
+                                                Margin="12,0">
+                                        <TextBlock Text="Получатель / причина"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBox x:Name="RecipientTextBox"
+                                                 Margin="0,6,0,0"
+                                                 Text="{Binding RecipientName, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource AppTextBoxStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2"
+                                                Margin="12,0,0,0">
+                                        <TextBlock Text="Статус"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <Border Margin="0,6,0,0"
+                                                Padding="14,12"
+                                                Background="#FFF1F5F9"
+                                                BorderBrush="#FFDCE4EF"
+                                                BorderThickness="1"
+                                                CornerRadius="12">
+                                            <TextBlock Text="{Binding DocumentStatus}"
+                                                       Foreground="{StaticResource TextPrimaryBrush}" />
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Grid.Row="2"
+                                            Margin="0,18,0,0">
+                                    <TextBlock Text="Комментарий"
+                                               Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBox x:Name="CommentTextBox"
+                                             Margin="0,6,0,0"
+                                             Height="72"
+                                             Text="{Binding DocumentComment, UpdateSourceTrigger=PropertyChanged}"
+                                             TextWrapping="Wrap"
+                                             AcceptsReturn="True"
+                                             VerticalScrollBarVisibility="Auto"
+                                             Style="{StaticResource AppTextBoxStyle}" />
+                                </StackPanel>
+
+                                <Grid Grid.Row="3"
+                                      Margin="0,22,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="240" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="160" />
+                                        <ColumnDefinition Width="160" />
+                                        <ColumnDefinition Width="200" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="Товар"
+                                               Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBlock Grid.Column="1"
+                                               Text="Комментарий строки"
+                                               Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBlock Grid.Column="2"
+                                               Text="Кол-во"
+                                               Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBlock Grid.Column="3"
+                                               Text="Остаток"
+                                               Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBlock Grid.Column="4"
+                                               Text="Проверка"
+                                               Style="{StaticResource CardCaptionTextStyle}" />
+
+                                    <ComboBox x:Name="ProductComboBox"
+                                              Grid.Row="1"
+                                              Margin="0,6,12,0"
+                                              ItemsSource="{Binding Products}"
+                                              SelectedItem="{Binding SelectedProduct, Mode=TwoWay}"
+                                              DisplayMemberPath="DisplayName"
+                                              Style="{StaticResource AppComboBoxStyle}" />
+                                    <TextBox x:Name="LineCommentTextBox"
+                                             Grid.Row="1"
+                                             Grid.Column="1"
+                                             Margin="0,6,12,0"
+                                             Style="{StaticResource AppTextBoxStyle}" />
+                                    <TextBox x:Name="LineQuantityTextBox"
+                                             Grid.Row="1"
+                                             Grid.Column="2"
+                                             Margin="0,6,12,0"
+                                             TextChanged="LineQuantityTextBox_OnTextChanged"
+                                             Style="{StaticResource AppTextBoxStyle}" />
+                                    <Border Grid.Row="1"
+                                            Grid.Column="3"
+                                            Margin="0,6,12,0"
+                                            Padding="14,12"
+                                            Background="#FFF8FAFD"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="12">
+                                        <TextBlock Text="{Binding SelectedProductStockText}"
+                                                   Foreground="{StaticResource TextPrimaryBrush}" />
+                                    </Border>
+                                    <Border Grid.Row="1"
+                                            Grid.Column="4"
+                                            Margin="0,6,0,0"
+                                            Padding="14,12"
+                                            Background="{Binding SelectedValidationBackground}"
+                                            BorderBrush="{Binding SelectedValidationBorder}"
+                                            BorderThickness="1"
+                                            CornerRadius="12">
+                                        <TextBlock Text="{Binding SelectedValidationText}"
+                                                   Foreground="{Binding SelectedValidationForeground}"
+                                                   TextWrapping="Wrap" />
+                                    </Border>
+
+                                    <DataGrid x:Name="LinesDataGrid"
+                                              Grid.Row="2"
+                                              Grid.ColumnSpan="5"
+                                              Margin="0,18,0,0"
+                                              ItemsSource="{Binding Lines}"
+                                              SelectedItem="{Binding SelectedLine, Mode=TwoWay}"
+                                              AutoGenerateColumns="False"
+                                              CanUserAddRows="False"
+                                              HeadersVisibility="Column"
+                                              IsReadOnly="True"
+                                              Style="{StaticResource AppDataGridStyle}">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="#"
+                                                                Binding="{Binding LineNo}" />
+                                            <DataGridTextColumn Header="SKU"
+                                                                Binding="{Binding Sku}" />
+                                            <DataGridTextColumn Header="Товар"
+                                                                Binding="{Binding ProductName}" />
+                                            <DataGridTextColumn Header="Кол-во"
+                                                                Binding="{Binding Quantity}" />
+                                            <DataGridTextColumn Header="Остаток"
+                                                                Binding="{Binding AvailableStock}" />
+                                            <DataGridTextColumn Header="Проверка"
+                                                                Binding="{Binding ValidationMessage}" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Grid>
+
+                                <Grid Grid.Row="4"
+                                      Margin="0,20,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding TotalsText}"
+                                               Style="{StaticResource PageDescriptionTextStyle}" />
+                                    <StackPanel Grid.Column="1"
+                                                Orientation="Horizontal"
+                                                HorizontalAlignment="Right">
+                                        <Button Content="Добавить строку"
+                                                Click="AddLineButton_OnClick"
+                                                Style="{StaticResource SecondaryButtonStyle}" />
+                                        <Button Margin="12,0,0,0"
+                                                Content="Удалить строку"
+                                                Click="RemoveLineButton_OnClick"
+                                                Style="{StaticResource SecondaryButtonStyle}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </Grid>
+
+                    <controls:MovementHistoryPanel Grid.Row="3"
+                                                   Margin="0,22,0,0"
+                                                   Title="История движений товара"
+                                                   Subtitle="Проверь, как расход влияет на остатки"
+                                                   SummaryText="{Binding HistorySummary}"
+                                                   FilterText="{Binding HistoryFilterText, UpdateSourceTrigger=PropertyChanged}"
+                                                   ItemsSource="{Binding FilteredHistory}" />
+                </Grid>
+            </Border>
+        </Grid>
     </ScrollViewer>
 </Page>

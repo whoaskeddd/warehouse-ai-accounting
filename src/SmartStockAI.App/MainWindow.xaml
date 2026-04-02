@@ -47,8 +47,7 @@
                                Style="{StaticResource AppTitleTextStyle}" />
                     <TextBlock Margin="0,6,0,0"
                                MaxWidth="228"
-                               Text="Чистый интерфейс для учета, аналитики и закупок"
-                               Style="{StaticResource AppSubtitleTextStyle}" />
+                               Style="{StaticResource AppSubtitleTextStyle}" ><Run Language="ru-ru" Text="Абрамов Смелов "/></TextBlock>
                 </StackPanel>
 
                 <StackPanel DockPanel.Dock="Bottom"
@@ -71,13 +70,6 @@
                                     Content="Открыть товары"
                                     Style="{StaticResource PrimaryButtonStyle}" />
                         </StackPanel>
-                    </Border>
-
-                    <Border Style="{StaticResource PillBadgeStyle}"
-                            HorizontalAlignment="Left">
-                        <TextBlock Text="UI Workspace"
-                                   Foreground="{StaticResource TextSecondaryBrush}"
-                                   FontWeight="SemiBold" />
                     </Border>
                 </StackPanel>
 

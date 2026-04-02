@@ -135,16 +135,28 @@
                                           Style="{StaticResource AppDataGridStyle}">
                                     <DataGrid.Columns>
                                         <DataGridTextColumn Header="Артикул"
+                                                            Width="140"
+                                                            ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                                             Binding="{Binding Sku}" />
                                         <DataGridTextColumn Header="Наименование"
+                                                            Width="2*"
+                                                            ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                                             Binding="{Binding Name}" />
                                         <DataGridTextColumn Header="Категория"
+                                                            Width="1.2*"
+                                                            ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                                             Binding="{Binding CategoryName}" />
                                         <DataGridTextColumn Header="Поставщик"
+                                                            Width="1.2*"
+                                                            ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                                             Binding="{Binding SupplierName}" />
                                         <DataGridTextColumn Header="Остаток"
+                                                            Width="110"
+                                                            ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                                             Binding="{Binding CurrentStock}" />
                                         <DataGridTextColumn Header="Min"
+                                                            Width="90"
+                                                            ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                                             Binding="{Binding MinStock}" />
                                     </DataGrid.Columns>
                                 </DataGrid>
