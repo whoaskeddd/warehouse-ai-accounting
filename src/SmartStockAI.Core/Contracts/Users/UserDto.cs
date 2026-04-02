@@ -8,4 +8,7 @@ public sealed class UserDto
     public string Login { get; init; } = string.Empty;
     public string DisplayName { get; init; } = string.Empty;
     public UserRole Role { get; init; }
+    public bool IsActive { get; init; }
+    public DateTime CreatedAtUtc { get; init; }
+    public DateTime? LastLoginAtUtc { get; init; }
 }

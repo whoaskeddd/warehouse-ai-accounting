@@ -2,13 +2,19 @@ using Microsoft.EntityFrameworkCore;
 using SmartStockAI.Core.Contracts.Suppliers;
 using SmartStockAI.Core.Entities;
 using SmartStockAI.Data.Context;
+using SmartStockAI.Data.Security;
 
 namespace SmartStockAI.Data.Services;
 
-public sealed class SupplierService(AppDbContext dbContext) : ISupplierService
+public sealed class SupplierService(
+    AppDbContext dbContext,
+    ICurrentUserAccessor currentUserAccessor,
+    IAuditLogWriter auditLogWriter) : ISupplierService
 {
     public async Task<IReadOnlyList<SupplierDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);
+
         return await dbContext.Suppliers
             .AsNoTracking()
             .OrderBy(x => x.Name)
@@ -23,6 +29,8 @@ public sealed class SupplierService(AppDbContext dbContext) : ISupplierService
 
     public async Task<SupplierDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);
+
         return await dbContext.Suppliers
             .AsNoTracking()
             .Where(x => x.Id == id)
@@ -37,6 +45,8 @@ public sealed class SupplierService(AppDbContext dbContext) : ISupplierService
 
     public async Task<SupplierDto> CreateAsync(CreateSupplierRequest request, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var normalizedName = request.Name.Trim();
         if (string.IsNullOrWhiteSpace(normalizedName))
         {
@@ -51,12 +61,15 @@ public sealed class SupplierService(AppDbContext dbContext) : ISupplierService
 
         dbContext.Suppliers.Add(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Supplier.Created", nameof(Supplier), entity.Id.ToString(), $"Supplier '{entity.Name}' created.", cancellationToken);
 
         return (await GetByIdAsync(entity.Id, cancellationToken))!;
     }
 
     public async Task<SupplierDto?> UpdateAsync(int id, UpdateSupplierRequest request, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var entity = await dbContext.Suppliers.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (entity is null)
         {
@@ -73,12 +86,15 @@ public sealed class SupplierService(AppDbContext dbContext) : ISupplierService
         entity.ContactInfo = request.ContactInfo?.Trim();
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Supplier.Updated", nameof(Supplier), entity.Id.ToString(), $"Supplier '{entity.Name}' updated.", cancellationToken);
 
         return await GetByIdAsync(id, cancellationToken);
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var entity = await dbContext.Suppliers.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (entity is null)
         {
@@ -93,6 +109,7 @@ public sealed class SupplierService(AppDbContext dbContext) : ISupplierService
 
         dbContext.Suppliers.Remove(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Supplier.Deleted", nameof(Supplier), id.ToString(), $"Supplier '{entity.Name}' deleted.", cancellationToken);
 
         return true;
     }

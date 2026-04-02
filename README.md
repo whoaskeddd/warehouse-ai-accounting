@@ -169,3 +169,10 @@ SmartStock AI — локальная система управления скл�
 5. **Безопасность:** Шифрование БД, аудит действий
 
  
+## Step 4 hardcoded admin
+
+- Login: `admin`
+- Password: `Admin123!`
+- Role: `Admin`
+
+Backend step 4 seeds this account automatically and keeps it as the only admin user in the system.

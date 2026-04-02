@@ -2,13 +2,19 @@ using Microsoft.EntityFrameworkCore;
 using SmartStockAI.Core.Contracts.Products;
 using SmartStockAI.Core.Entities;
 using SmartStockAI.Data.Context;
+using SmartStockAI.Data.Security;
 
 namespace SmartStockAI.Data.Services;
 
-public sealed class ProductService(AppDbContext dbContext) : IProductService
+public sealed class ProductService(
+    AppDbContext dbContext,
+    ICurrentUserAccessor currentUserAccessor,
+    IAuditLogWriter auditLogWriter) : IProductService
 {
     public async Task<IReadOnlyList<ProductDto>> GetAllAsync(CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);
+
         return await dbContext.Products
             .AsNoTracking()
             .OrderBy(x => x.Name)
@@ -18,6 +24,8 @@ public sealed class ProductService(AppDbContext dbContext) : IProductService
 
     public async Task<ProductDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);
+
         return await dbContext.Products
             .AsNoTracking()
             .Where(x => x.Id == id)
@@ -27,6 +35,8 @@ public sealed class ProductService(AppDbContext dbContext) : IProductService
 
     public async Task<ProductDto> CreateAsync(CreateProductRequest request, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var normalizedSku = request.Sku.Trim();
         var normalizedName = request.Name.Trim();
         var normalizedUnit = request.Unit.Trim();
@@ -59,12 +69,15 @@ public sealed class ProductService(AppDbContext dbContext) : IProductService
 
         dbContext.Products.Add(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Product.Created", nameof(Product), entity.Id.ToString(), $"Product '{entity.Sku}' created.", cancellationToken);
 
         return (await GetByIdAsync(entity.Id, cancellationToken))!;
     }
 
     public async Task<ProductDto?> UpdateAsync(int id, UpdateProductRequest request, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var entity = await dbContext.Products.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (entity is null)
         {
@@ -98,12 +111,15 @@ public sealed class ProductService(AppDbContext dbContext) : IProductService
         entity.SalePrice = request.SalePrice;
 
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Product.Updated", nameof(Product), entity.Id.ToString(), $"Product '{entity.Sku}' updated.", cancellationToken);
 
         return await GetByIdAsync(id, cancellationToken);
     }
 
     public async Task<bool> DeleteAsync(int id, CancellationToken cancellationToken = default)
     {
+        AuthorizationGuard.EnsureWarehouseOrAdmin(currentUserAccessor);
+
         var entity = await dbContext.Products.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         if (entity is null)
         {
@@ -130,6 +146,7 @@ public sealed class ProductService(AppDbContext dbContext) : IProductService
 
         dbContext.Products.Remove(entity);
         await dbContext.SaveChangesAsync(cancellationToken);
+        await auditLogWriter.WriteAsync("Product.Deleted", nameof(Product), id.ToString(), $"Product '{entity.Sku}' deleted.", cancellationToken);
 
         return true;
     }

@@ -2,7 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using SmartStockAI.Core.Contracts.Auth;
+using SmartStockAI.Core.Contracts.Audit;
+using SmartStockAI.Core.Contracts.Backup;
 using SmartStockAI.Core.Contracts.Categories;
+using SmartStockAI.Core.Contracts.Inventory;
 using SmartStockAI.Core.Contracts.Locations;
 using SmartStockAI.Core.Contracts.Products;
 using SmartStockAI.Core.Contracts.Stock;
@@ -10,6 +14,7 @@ using SmartStockAI.Core.Contracts.Suppliers;
 using SmartStockAI.Core.Contracts.Users;
 using SmartStockAI.App.Services;
 using SmartStockAI.Data.Context;
+using SmartStockAI.Data.Security;
 using SmartStockAI.Data.Services;
 using System.Windows;
 using System.Windows.Controls;
@@ -47,6 +52,15 @@ public partial class App : Application
                     context.Configuration.GetConnectionString("DefaultConnection"));
 
                 services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+                services.AddSingleton<ICurrentUserAccessor, CurrentUserAccessor>();
+                services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
+                services.AddScoped<AppDataInitializer>();
+                services.AddScoped<IAuditService, AuditService>();
+                services.AddScoped<IAuditLogWriter>(provider => (AuditService)provider.GetRequiredService<IAuditService>());
+                services.AddScoped<IAuthService, AuthService>();
+                services.AddScoped<IUserService, UserService>();
+                services.AddScoped<IInventoryService, InventoryService>();
+                services.AddScoped<IBackupService, BackupService>();
                 services.AddScoped<IProductService, ProductService>();
                 services.AddScoped<ICategoryService, CategoryService>();
                 services.AddScoped<ISupplierService, SupplierService>();
@@ -74,6 +88,14 @@ public partial class App : Application
         using var scope = Services.CreateScope();
         using var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         dbContext.Database.Migrate();
+        var initializer = scope.ServiceProvider.GetRequiredService<AppDataInitializer>();
+        initializer.InitializeAsync().GetAwaiter().GetResult();
+        var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+        authService.LoginAsync(new LoginRequest
+        {
+            Login = DefaultAdminCredentials.Login,
+            Password = DefaultAdminCredentials.Password
+        }).GetAwaiter().GetResult();
 
         var mainWindow = Services.GetRequiredService<MainWindow>();
         MainWindow = mainWindow;

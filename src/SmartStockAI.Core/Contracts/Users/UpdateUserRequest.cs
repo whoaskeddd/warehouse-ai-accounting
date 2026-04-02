@@ -6,5 +6,7 @@ public sealed class UpdateUserRequest
 {
     public string Login { get; init; } = string.Empty;
     public string DisplayName { get; init; } = string.Empty;
+    public string? Password { get; init; }
     public UserRole Role { get; init; }
+    public bool IsActive { get; init; } = true;
 }

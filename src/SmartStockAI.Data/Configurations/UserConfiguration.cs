@@ -20,10 +20,23 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasMaxLength(128);
 
+        builder.Property(x => x.PasswordHash)
+            .IsRequired()
+            .HasMaxLength(256);
+
+        builder.Property(x => x.PasswordSalt)
+            .IsRequired()
+            .HasMaxLength(128);
+
         builder.Property(x => x.Role)
             .HasConversion<string>()
             .HasMaxLength(32)
             .IsRequired();
+
+        builder.Property(x => x.CreatedAtUtc)
+            .IsRequired();
+
+        builder.Property(x => x.LastLoginAtUtc);
 
         builder.HasIndex(x => x.Login)
             .IsUnique();
