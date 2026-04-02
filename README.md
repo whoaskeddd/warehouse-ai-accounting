@@ -176,3 +176,23 @@ SmartStock AI — локальная система управления скл�
 - Role: `Admin`
 
 Backend step 4 seeds this account automatically and keeps it as the only admin user in the system.
+
+## Step 4 default login accounts
+
+- Warehouse operator: `operator` / `Operator123!`
+- Manager: `manager` / `Manager123!`
+
+Application startup opens a login window and expects regular users to sign in with one of these non-admin roles.
+Admin sign-in is blocked by default in the UI.
+
+Developers can enable admin sign-in temporarily before launch:
+
+```powershell
+$env:SMARTSTOCKAI_ENABLE_ADMIN_LOггGIN="1"
+dotnet run --project .\src\SmartStockAI.App\SmartStockAI.App.csproj
+```
+
+After that, admin login works with:
+
+- Login: `admin`
+- Password: `Admin123!`

@@ -19,14 +19,13 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel>
-                        <TextBlock Text="DOCUMENT FLOW"
-                                   Style="{StaticResource SectionEyebrowTextStyle}" />
+                        <TextBlock
+                                   Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="ДОКУМЕНТООБОРОТ"/></TextBlock>
                         <TextBlock Margin="0,10,0,0"
                                    Text="Расходные накладные"
                                    Style="{StaticResource PageTitleTextStyle}" />
                         <TextBlock Margin="0,8,0,0"
-                                   Text="UI для расхода с контролем остатков: редактор документа, предупреждения по нехватке, список строк и история движения по SKU."
-                                   Style="{StaticResource PageDescriptionTextStyle}" />
+                                   Style="{StaticResource PageDescriptionTextStyle}" ><Run Language="ru-ru" Text="Контроль р"/><Run Text="асхода с контролем остатков: редактор документа, предупреждения по нехватке, список строк и история движения по SKU."/></TextBlock>
                     </StackPanel>
 
                     <Border Grid.Row="1"
@@ -187,7 +186,7 @@
                                     <TextBlock Text="Товар"
                                                Style="{StaticResource CardCaptionTextStyle}" />
                                     <TextBlock Grid.Column="1"
-                                               Text="Комментарий строки"
+                                               Text="Комментарий "
                                                Style="{StaticResource CardCaptionTextStyle}" />
                                     <TextBlock Grid.Column="2"
                                                Text="Кол-во"

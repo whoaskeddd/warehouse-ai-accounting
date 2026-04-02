@@ -12,6 +12,7 @@ using SmartStockAI.Core.Contracts.Products;
 using SmartStockAI.Core.Contracts.Stock;
 using SmartStockAI.Core.Contracts.Suppliers;
 using SmartStockAI.Core.Contracts.Users;
+using SmartStockAI.App.Services;
 using SmartStockAI.Data.Context;
 using SmartStockAI.Data.Security;
 using SmartStockAI.Data.Services;
@@ -33,6 +34,8 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
         EventManager.RegisterClassHandler(
             typeof(DataGrid),
             UIElement.PreviewMouseWheelEvent,
@@ -44,6 +47,7 @@ public partial class App : Application
             {
                 configuration.SetBasePath(AppContext.BaseDirectory);
                 configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false);
+                configuration.AddJsonFile("appsettings.local.json", optional: true, reloadOnChange: false);
             })
             .ConfigureServices((context, services) =>
             {
@@ -65,6 +69,11 @@ public partial class App : Application
                 services.AddScoped<ISupplierService, SupplierService>();
                 services.AddScoped<ILocationService, LocationService>();
                 services.AddScoped<IStockService, StockService>();
+                services.AddScoped<IUserService, UserService>();
+                services.AddSingleton<AppSessionService>();
+                services.AddSingleton<AuditTrailService>();
+                services.AddSingleton<BackupWorkspaceService>();
+                services.AddTransient<LoginWindow>();
                 services.AddTransient<MainWindow>();
                 services.AddTransient<Views.ProductsPage>();
                 services.AddTransient<Views.CategoriesPage>();
@@ -74,6 +83,8 @@ public partial class App : Application
                 services.AddTransient<Views.InboundPage>();
                 services.AddTransient<Views.OutboundPage>();
                 services.AddTransient<Views.InventoryPage>();
+                services.AddTransient<Views.UsersPage>();
+                services.AddTransient<Views.AdministrationPage>();
                 services.AddTransient<Views.ReportsPage>();
             })
             .Build();
@@ -83,15 +94,17 @@ public partial class App : Application
         dbContext.Database.Migrate();
         var initializer = scope.ServiceProvider.GetRequiredService<AppDataInitializer>();
         initializer.InitializeAsync().GetAwaiter().GetResult();
-        var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
-        authService.LoginAsync(new LoginRequest
+        var loginWindow = Services.GetRequiredService<LoginWindow>();
+        var loginResult = loginWindow.ShowDialog();
+        if (loginResult != true)
         {
-            Login = DefaultAdminCredentials.Login,
-            Password = DefaultAdminCredentials.Password
-        }).GetAwaiter().GetResult();
+            Shutdown();
+            return;
+        }
 
         var mainWindow = Services.GetRequiredService<MainWindow>();
         MainWindow = mainWindow;
+        ShutdownMode = ShutdownMode.OnMainWindowClose;
         mainWindow.Show();
     }
 

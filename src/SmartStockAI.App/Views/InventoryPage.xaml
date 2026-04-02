@@ -7,25 +7,271 @@
       Background="Transparent"
       Title="Инвентаризация">
     <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
-    <Grid Margin="0,0,0,8">
-        <Border Style="{StaticResource PageContainerStyle}">
-            <StackPanel>
-                    <TextBlock
-                           Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="УПРАВЛЕНИЕ"/></TextBlock>
-                    <TextBlock Margin="0,10,0,0"
-                           Text="Инвентаризация"
-                           Style="{StaticResource PageTitleTextStyle}" />
-                    <TextBlock Margin="0,8,0,0"
-                           Style="{StaticResource PageDescriptionTextStyle}" ><Run Language="ru-ru" Text="Проверк"/><Run Text=" остатков, расхождениях и завершении"/><Run Language="ru-ru" Text="."/></TextBlock>
-                    <Button Margin="0,18,0,0"
-                        HorizontalAlignment="Left"
-                        Content="Начать инвентаризацию"
-                        Style="{StaticResource SecondaryButtonStyle}" />
-                <TextBlock Margin="0,28,0,0"
-                           Text="Пустой экран инвентаризации."
-                           Style="{StaticResource PlaceholderTextStyle}" />
-            </StackPanel>
-        </Border>
-    </Grid>
+        <Grid Margin="0,0,0,8">
+            <Border Style="{StaticResource PageContainerStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel>
+                        <TextBlock
+                                   Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="КОНТРОЛЬ ЗАПАСОВ"/></TextBlock>
+                        <TextBlock Margin="0,10,0,0"
+                                   Text="Инвентаризация"
+                                   Style="{StaticResource PageTitleTextStyle}" />
+                        <TextBlock Margin="0,8,0,0"
+                                   Style="{StaticResource PageDescriptionTextStyle}" ><Run Language="ru-ru" Text="П"/><Run Text="ересчет остатков, акт расхождений и фиксация ручных комментариев по результатам проверки."/></TextBlock>
+                    </StackPanel>
+
+                    <Grid Grid.Row="1"
+                          Margin="0,28,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="18" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Style="{StaticResource StatCardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="Позиций в пересчете"
+                                           Style="{StaticResource CardCaptionTextStyle}" />
+                                <TextBlock Margin="0,10,0,0"
+                                           Text="{Binding TotalItemsCount}"
+                                           Style="{StaticResource CardValueTextStyle}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="2"
+                                Style="{StaticResource StatCardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="Есть расхождения"
+                                           Style="{StaticResource CardCaptionTextStyle}" />
+                                <TextBlock Margin="0,10,0,0"
+                                           Text="{Binding DiscrepanciesCount}"
+                                           Style="{StaticResource CardValueTextStyle}" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="4"
+                                Style="{StaticResource StatCardStyle}">
+                            <StackPanel>
+                                <TextBlock Text="Активный оператор"
+                                           Style="{StaticResource CardCaptionTextStyle}" />
+                                <TextBlock Margin="0,10,0,0"
+                                           Text="{Binding CurrentOperator}"
+                                           Style="{StaticResource PageDescriptionTextStyle}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Grid Grid.Row="2"
+                          Margin="0,28,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="260" />
+                                <ColumnDefinition Width="140" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox Grid.Column="0"
+                                     Margin="0,0,12,0"
+                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource AppTextBoxStyle}" />
+                            <ComboBox Grid.Column="1"
+                                      Margin="0,0,12,0"
+                                      ItemsSource="{Binding DifferenceFilterOptions}"
+                                      SelectedItem="{Binding SelectedDifferenceFilter, Mode=TwoWay}"
+                                      DisplayMemberPath="Name"
+                                      Style="{StaticResource AppComboBoxStyle}" />
+                            <Border Grid.Column="2"
+                                    Margin="0,0,12,0"
+                                    Padding="14,12"
+                                    Background="#FFF8FAFD"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                <TextBlock Text="{Binding SessionSummary}" />
+                            </Border>
+                            <StackPanel Grid.Column="3"
+                                        Orientation="Horizontal">
+                                <Button Content="Сбросить пересчет"
+                                        Click="ResetSessionButton_OnClick"
+                                        Style="{StaticResource SecondaryButtonStyle}" />
+                                <Button Margin="12,0,0,0"
+                                        Content="Сформировать акт"
+                                        Click="GenerateActButton_OnClick"
+                                        Style="{StaticResource PrimaryButtonStyle}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Border Grid.Row="1"
+                                Margin="0,18,0,0"
+                                Padding="4"
+                                Background="#FFF8FAFD"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="18">
+                            <DataGrid ItemsSource="{Binding FilteredItems}"
+                                      SelectedItem="{Binding SelectedInventoryItem, Mode=TwoWay}"
+                                      AutoGenerateColumns="False"
+                                      CanUserAddRows="False"
+                                      IsReadOnly="True"
+                                      Style="{StaticResource AppDataGridStyle}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="SKU"
+                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                        Binding="{Binding Sku}" />
+                                    <DataGridTextColumn Header="Товар"
+                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                        Binding="{Binding ProductName}" />
+                                    <DataGridTextColumn Header="Категория"
+                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                        Binding="{Binding CategoryName}" />
+                                    <DataGridTextColumn Header="Локация"
+                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                        Binding="{Binding LocationName}" />
+                                    <DataGridTextColumn Header="Ожидалось"
+                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                        Binding="{Binding ExpectedStock}" />
+                                    <DataGridTextColumn Header="Факт"
+                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                        Binding="{Binding CountedStock}" />
+                                    <DataGridTextColumn Header="Разница"
+                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                        Binding="{Binding Difference}" />
+                                    <DataGridTextColumn Header="Комментарий"
+                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                        Binding="{Binding Comment}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+
+                        <Grid Grid.Row="2"
+                              Margin="0,20,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1.1*" />
+                                <ColumnDefinition Width="18" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Style="{StaticResource PanelCardStyle}"
+                                    Margin="0">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel>
+                                        <TextBlock Text="Ввод факта"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBlock Margin="0,8,0,0"
+                                                   Text="{Binding SelectedItemTitle}"
+                                                   Style="{StaticResource PageTitleTextStyle}"
+                                                   FontSize="24" />
+                                    </StackPanel>
+
+                                    <Grid Grid.Row="1"
+                                          Margin="0,20,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Фактический остаток"
+                                                   VerticalAlignment="Center"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBox x:Name="CountedStockTextBox"
+                                                 Grid.Column="1"
+                                                 Text="{Binding CountedStockText, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource AppTextBoxStyle}" />
+                                    </Grid>
+
+                                    <Grid Grid.Row="2"
+                                          Margin="0,16,0,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="CountCommentTextBox"
+                                                 Margin="0,0,12,0"
+                                                 Text="{Binding CountCommentText, UpdateSourceTrigger=PropertyChanged}"
+                                                 Style="{StaticResource AppTextBoxStyle}" />
+                                        <Button Grid.Column="1"
+                                                Content="Применить"
+                                                Click="ApplyCountButton_OnClick"
+                                                Style="{StaticResource SecondaryButtonStyle}" />
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource PanelCardStyle}"
+                                    Margin="0">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <StackPanel>
+                                        <TextBlock Text="Акт расхождений"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBlock Margin="0,8,0,0"
+                                                   Text="{Binding DiscrepancyTitle}"
+                                                   Style="{StaticResource PageTitleTextStyle}"
+                                                   FontSize="24" />
+                                    </StackPanel>
+
+                                    <Border Grid.Row="1"
+                                            Margin="0,18,0,0"
+                                            Padding="4"
+                                            Background="#FFF8FAFD"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="18">
+                                        <DataGrid ItemsSource="{Binding Discrepancies}"
+                                                  AutoGenerateColumns="False"
+                                                  CanUserAddRows="False"
+                                                  IsReadOnly="True"
+                                                  Style="{StaticResource AppDataGridStyle}">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="SKU"
+                                                                    ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                    Binding="{Binding Sku}" />
+                                                <DataGridTextColumn Header="Товар"
+                                                                    ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                    Binding="{Binding ProductName}" />
+                                                <DataGridTextColumn Header="Ожидалось"
+                                                                    ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                    Binding="{Binding ExpectedStock}" />
+                                                <DataGridTextColumn Header="Факт"
+                                                                    ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                    Binding="{Binding CountedStock}" />
+                                                <DataGridTextColumn Header="Разница"
+                                                                    ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                    Binding="{Binding Difference}" />
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
     </ScrollViewer>
 </Page>

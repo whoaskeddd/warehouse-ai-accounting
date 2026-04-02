@@ -5,3 +5,4 @@ obj/
 *.slnx
 build-diag.log
 smartstockai.db
+src/SmartStockAI.App/appsettings.local.json
