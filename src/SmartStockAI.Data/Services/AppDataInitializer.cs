@@ -33,6 +33,16 @@ public sealed class AppDataInitializer(AppDbContext dbContext, IPasswordHasher p
                 CreatedAtUtc = DateTime.UtcNow
             });
         }
+        else
+        {
+            var admin = admins[0];
+            var (hash, salt) = passwordHasher.HashPassword(DefaultAdminCredentials.Password);
+            admin.Login = DefaultAdminCredentials.Login;
+            admin.DisplayName = DefaultAdminCredentials.DisplayName;
+            admin.PasswordHash = hash;
+            admin.PasswordSalt = salt;
+            admin.IsActive = true;
+        }
 
         await EnsureDefaultUserAsync(
             login: "operator",

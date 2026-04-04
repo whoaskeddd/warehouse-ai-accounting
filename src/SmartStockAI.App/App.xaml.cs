@@ -9,6 +9,7 @@ using SmartStockAI.Core.Contracts.Categories;
 using SmartStockAI.Core.Contracts.Inventory;
 using SmartStockAI.Core.Contracts.Locations;
 using SmartStockAI.Core.Contracts.Products;
+using SmartStockAI.Core.Contracts.Reports;
 using SmartStockAI.Core.Contracts.Stock;
 using SmartStockAI.Core.Contracts.Suppliers;
 using SmartStockAI.Core.Contracts.Users;
@@ -69,6 +70,7 @@ public partial class App : Application
                 services.AddScoped<ISupplierService, SupplierService>();
                 services.AddScoped<ILocationService, LocationService>();
                 services.AddScoped<IStockService, StockService>();
+                services.AddScoped<IReportService, ReportService>();
                 services.AddScoped<IUserService, UserService>();
                 services.AddSingleton<AppSessionService>();
                 services.AddSingleton<AuditTrailService>();

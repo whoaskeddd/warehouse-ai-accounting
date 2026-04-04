@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -34,9 +34,9 @@ public partial class UsersPage : Page, INotifyPropertyChanged
         Users = [];
         RoleOptions =
         [
-            new LookupItem { Id = (int)UserRole.Admin, Name = "Administrator" },
-            new LookupItem { Id = (int)UserRole.WarehouseOperator, Name = "Warehouse Operator" },
-            new LookupItem { Id = (int)UserRole.Manager, Name = "Manager" }
+            new LookupItem { Id = (int)UserRole.Admin, Name = "Администратор" },
+            new LookupItem { Id = (int)UserRole.WarehouseOperator, Name = "Оператор склада" },
+            new LookupItem { Id = (int)UserRole.Manager, Name = "Менеджер" }
         ];
 
         _appSession.CurrentUserChanged += AppSession_OnCurrentUserChanged;
@@ -112,18 +112,18 @@ public partial class UsersPage : Page, INotifyPropertyChanged
     public string CurrentUserDisplay => _appSession.CurrentUserDisplayName;
 
     public string SessionRoleLabel =>
-        SessionSelectedUser is null ? "Role not selected" : MapRole(SessionSelectedUser.Role);
+        SessionSelectedUser is null ? "Роль не выбрана" : MapRole(SessionSelectedUser.Role);
 
-    public string EditorTitle => _editingUserId.HasValue ? "Edit user" : "New user";
+    public string EditorTitle => _editingUserId.HasValue ? "Редактирование пользователя" : "Новый пользователь";
 
-    public string PasswordCaption => _editingUserId.HasValue ? "Password (leave blank to keep current)" : "Password";
+    public string PasswordCaption => _editingUserId.HasValue ? "Пароль (оставьте пустым, чтобы не менять)" : "Пароль";
 
     public string SelectedRoleDescription => SelectedRoleOption?.Id switch
     {
-        (int)UserRole.Admin => "Full administrative access. Creating a second admin is blocked by backend rules.",
-        (int)UserRole.WarehouseOperator => "Warehouse operations, stock documents and inventory sessions.",
-        (int)UserRole.Manager => "Read-oriented role for analytics and dashboards.",
-        _ => "Select a role to view its access scope."
+        (int)UserRole.Admin => "Полный административный доступ. Создание второго администратора запрещено правилами backend.",
+        (int)UserRole.WarehouseOperator => "Операции склада, документы движения и инвентаризации.",
+        (int)UserRole.Manager => "Роль для просмотра аналитики и дашбордов.",
+        _ => "Выберите роль, чтобы увидеть её уровень доступа."
     };
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
@@ -141,14 +141,14 @@ public partial class UsersPage : Page, INotifyPropertyChanged
     {
         if (SessionSelectedUser is null)
         {
-            MessageBox.Show("Select a user first.", "Users", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Сначала выберите пользователя.", "Пользователи", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         SelectedUser = SessionSelectedUser;
         MessageBox.Show(
-            "Backend authentication in step 4 is fixed to the current logged-in user. This selector now opens the user in the editor only.",
-            "Users",
+            "Аутентификация на backend в шаге 4 привязана к текущему вошедшему пользователю. Этот список сейчас только открывает пользователя в редакторе.",
+            "Пользователи",
             MessageBoxButton.OK,
             MessageBoxImage.Information);
     }
@@ -163,14 +163,14 @@ public partial class UsersPage : Page, INotifyPropertyChanged
     {
         if (string.IsNullOrWhiteSpace(EditorLogin) || string.IsNullOrWhiteSpace(EditorDisplayName) || SelectedRoleOption?.Id is not int roleValue)
         {
-            MessageBox.Show("Login, display name and role are required.", "Users", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Логин, отображаемое имя и роль обязательны.", "Пользователи", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         var isEditing = _editingUserId.HasValue;
         if (!isEditing && string.IsNullOrWhiteSpace(EditorPassword))
         {
-            MessageBox.Show("Password is required for a new user.", "Users", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Для нового пользователя нужно указать пароль.", "Пользователи", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -204,7 +204,7 @@ public partial class UsersPage : Page, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Users", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Пользователи", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -216,8 +216,8 @@ public partial class UsersPage : Page, INotifyPropertyChanged
         }
 
         if (MessageBox.Show(
-                $"Delete user {SelectedUser.DisplayName}?",
-                "Users",
+                $"Удалить пользователя {SelectedUser.DisplayName}?",
+                "Пользователи",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question) != MessageBoxResult.Yes)
         {
@@ -236,7 +236,7 @@ public partial class UsersPage : Page, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Users", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Пользователи", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -306,9 +306,9 @@ public partial class UsersPage : Page, INotifyPropertyChanged
 
     private static string MapRole(UserRole role) => role switch
     {
-        UserRole.Admin => "Administrator",
-        UserRole.WarehouseOperator => "Warehouse Operator",
-        UserRole.Manager => "Manager",
+        UserRole.Admin => "Администратор",
+        UserRole.WarehouseOperator => "Оператор склада",
+        UserRole.Manager => "Менеджер",
         _ => role.ToString()
     };
 

@@ -10,4 +10,6 @@ public sealed class BackupSnapshotItem
     public DateTime CreatedAt { get; init; }
     public string CreatedBy { get; init; } = string.Empty;
     public string Status { get; set; } = string.Empty;
+
+    public override string ToString() => Name;
 }

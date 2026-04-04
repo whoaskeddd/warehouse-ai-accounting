@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Extensions.DependencyInjection;
@@ -141,7 +141,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         var role = _appSession.CurrentUser?.Role;
         OpenUsersButton.Visibility = role == UserRole.Admin ? Visibility.Visible : Visibility.Collapsed;
-        QuickActionCard.Visibility = role == UserRole.Manager ? Visibility.Collapsed : Visibility.Visible;
+        QuickActionCard.Visibility = role == UserRole.WarehouseOperator ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private bool IsRouteAllowed(string key)
@@ -167,3 +167,5 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         };
     }
 }
+
+

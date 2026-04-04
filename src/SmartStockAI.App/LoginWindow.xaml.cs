@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using Microsoft.Extensions.Configuration;
@@ -64,7 +64,7 @@ public partial class LoginWindow : Window, INotifyPropertyChanged
 
         if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password))
         {
-            ErrorMessage = "Login and password are required.";
+            ErrorMessage = "Введите логин и пароль.";
             return;
         }
 
@@ -73,7 +73,7 @@ public partial class LoginWindow : Window, INotifyPropertyChanged
             var user = await _userService.GetByLoginAsync(login);
             if (user?.Role == UserRole.Admin && !IsAdminLoginEnabled())
             {
-                ErrorMessage = "Admin sign-in is disabled. Enable DeveloperAccess:EnableAdminLogin in appsettings.local.json.";
+                ErrorMessage = "Вход администратора отключён. Включите DeveloperAccess:EnableAdminLogin в appsettings.local.json.";
                 return;
             }
 
@@ -85,14 +85,14 @@ public partial class LoginWindow : Window, INotifyPropertyChanged
 
             if (!authResult.IsAuthenticated || authResult.User is null)
             {
-                ErrorMessage = authResult.Error ?? "Sign-in failed.";
+                ErrorMessage = TranslateError(authResult.Error) ?? "Не удалось выполнить вход.";
                 return;
             }
 
             if (authResult.User.Role == UserRole.Admin && !IsAdminLoginEnabled())
             {
                 await _authService.LogoutAsync();
-                ErrorMessage = "Admin sign-in is disabled. Enable DeveloperAccess:EnableAdminLogin in appsettings.local.json.";
+                ErrorMessage = "Вход администратора отключён. Включите DeveloperAccess:EnableAdminLogin в appsettings.local.json.";
                 return;
             }
 
@@ -101,7 +101,7 @@ public partial class LoginWindow : Window, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = TranslateError(ex.Message) ?? "Произошла ошибка при входе.";
         }
     }
 
@@ -114,6 +114,15 @@ public partial class LoginWindow : Window, INotifyPropertyChanged
     {
         return _configuration.GetValue<bool>("DeveloperAccess:EnableAdminLogin");
     }
+
+    private static string? TranslateError(string? error) => error switch
+    {
+        null => null,
+        "Login and password are required." => "Введите логин и пароль.",
+        "Invalid login or password." => "Неверный логин или пароль.",
+        "Sign-in failed." => "Не удалось выполнить вход.",
+        _ => error
+    };
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {

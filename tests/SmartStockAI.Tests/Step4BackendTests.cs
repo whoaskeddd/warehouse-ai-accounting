@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartStockAI.Core.Contracts.Auth;
 using SmartStockAI.Core.Contracts.Inventory;
 using SmartStockAI.Core.Contracts.Products;
+using SmartStockAI.Core.Contracts.Reports;
 using SmartStockAI.Core.Contracts.Users;
 using SmartStockAI.Core.Entities;
 using SmartStockAI.Core.Enums;
@@ -53,6 +54,35 @@ public class Step4BackendTests : IDisposable
         result.User.Should().NotBeNull();
         result.User!.Role.Should().Be(UserRole.Admin);
         currentUserAccessor.UserId.Should().Be(result.User.Id);
+    }
+
+    [Fact]
+    public async Task AppDataInitializer_ShouldSynchronizeExistingAdminOnEveryStartup()
+    {
+        await using var context = CreateContext();
+        var passwordHasher = new Pbkdf2PasswordHasher();
+        var (oldHash, oldSalt) = passwordHasher.HashPassword("OldPassword123!");
+
+        context.Users.Add(new User
+        {
+            Login = "legacy-admin",
+            DisplayName = "Legacy Admin",
+            PasswordHash = oldHash,
+            PasswordSalt = oldSalt,
+            Role = UserRole.Admin,
+            IsActive = false,
+            CreatedAtUtc = DateTime.UtcNow.AddDays(-3)
+        });
+        await context.SaveChangesAsync();
+
+        var initializer = new AppDataInitializer(context, passwordHasher);
+        await initializer.InitializeAsync();
+
+        var admin = await context.Users.SingleAsync(x => x.Role == UserRole.Admin);
+        admin.Login.Should().Be(DefaultAdminCredentials.Login);
+        admin.DisplayName.Should().Be(DefaultAdminCredentials.DisplayName);
+        admin.IsActive.Should().BeTrue();
+        passwordHasher.Verify(DefaultAdminCredentials.Password, admin.PasswordHash, admin.PasswordSalt).Should().BeTrue();
     }
 
     [Fact]
@@ -232,6 +262,57 @@ public class Step4BackendTests : IDisposable
                 }
             }
         }
+    }
+
+    [Fact]
+    public async Task ReportService_ShouldExportAndImportExcelSnapshot()
+    {
+        await using var context = CreateContext();
+        var currentUserAccessor = new CurrentUserAccessor();
+        currentUserAccessor.SetCurrentUser(21, UserRole.Manager);
+
+        context.Users.Add(new User
+        {
+            Id = 21,
+            Login = "manager-report",
+            DisplayName = "Manager Report",
+            PasswordHash = "x",
+            PasswordSalt = "y",
+            Role = UserRole.Manager,
+            IsActive = true,
+            CreatedAtUtc = DateTime.UtcNow
+        });
+
+        context.Products.Add(new Product
+        {
+            Sku = "SKU-REP",
+            Name = "Report Product",
+            Unit = "pcs",
+            CurrentStock = 15,
+            ReservedStock = 3,
+            MinStock = 5,
+            PurchasePrice = 10,
+            SalePrice = 14
+        });
+        await context.SaveChangesAsync();
+
+        var auditService = new AuditService(context, currentUserAccessor);
+        var reportService = new ReportService(context, currentUserAccessor, auditService);
+
+        var exported = await reportService.ExportReportToExcelAsync("inventory-balance");
+        exported.Should().NotBeEmpty();
+
+        var imported = await reportService.ImportReportFromExcelAsync(exported, "inventory-balance.xlsx");
+        imported.ReportKey.Should().Be("inventory-balance");
+        imported.RowsCount.Should().Be(1);
+        imported.ImportedByDisplayName.Should().Be("Manager Report");
+
+        var stored = await reportService.GetImportedReportAsync(imported.Id);
+        stored.Should().NotBeNull();
+        stored!.Rows.Should().ContainSingle();
+        stored.Rows[0]["sku"].Should().Be("SKU-REP");
+        stored.Rows[0]["availableStock"].Should().Be("12");
+        context.ImportedReportSnapshots.Should().ContainSingle(x => x.Id == imported.Id);
     }
 
     public void Dispose()

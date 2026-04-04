@@ -1,4 +1,4 @@
-<Page x:Class="SmartStockAI.App.Views.AdministrationPage"
+﻿<Page x:Class="SmartStockAI.App.Views.AdministrationPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -17,13 +17,15 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel>
-                        <TextBlock
-                                   Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="ИНСТРУМЕНТЫ УПРАВЛЕНИЯ"/></TextBlock>
+                        <TextBlock Style="{StaticResource SectionEyebrowTextStyle}">
+                            <Run Language="ru-ru" Text="ИНСТРУМЕНТЫ УПРАВЛЕНИЯ" />
+                        </TextBlock>
                         <TextBlock Margin="0,10,0,0"
-                                   Text="Backup и журнал действий"
+                                   Text="Резервные копии и журнал действий"
                                    Style="{StaticResource PageTitleTextStyle}" />
                         <TextBlock Margin="0,8,0,0"
-                                   Style="{StaticResource PageDescriptionTextStyle}" ><Run Language="ru-ru" Text="Страница для "/><Run Text="административных с"/><Run Language="ru-ru" Text="ценариев:"/><Run Text="ручной backup/restore и журнал ключевых операций."/></TextBlock>
+                                   Text="Страница для административных сценариев: ручное создание и восстановление резервных копий, а также просмотр журнала ключевых операций."
+                                   Style="{StaticResource PageDescriptionTextStyle}" />
                     </StackPanel>
 
                     <Grid Grid.Row="1"
@@ -50,17 +52,18 @@
                                     </Grid.ColumnDefinitions>
 
                                     <StackPanel>
-                                        <TextBlock
+                                        <TextBlock Text="Резервные копии"
                                                    Style="{StaticResource CardCaptionTextStyle}" />
                                         <TextBlock Margin="0,3,0,0"
+                                                   Text="{Binding BackupTitle}"
                                                    Style="{StaticResource PageTitleTextStyle}"
-                                                   FontSize="24" ><Run Language="ru-ru"/></TextBlock>
+                                                   FontSize="24" />
                                     </StackPanel>
 
-                                    <Button
-                                            Content="Создать backup"
+                                    <Button Content="Создать резервную копию"
                                             Click="CreateBackupButton_OnClick"
-                                            Style="{StaticResource PrimaryButtonStyle}" Margin="-6,0,0,0" />
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            Margin="-6,0,0,0" />
                                 </Grid>
 
                                 <TextBox x:Name="BackupCommentTextBox"
@@ -113,7 +116,7 @@
                                     <StackPanel Grid.Row="2"
                                                 Margin="0,16,0,0"
                                                 Orientation="Horizontal">
-                                        <Button Content="Восстановить выбранный"
+                                        <Button Content="Восстановить выбранную"
                                                 Click="RestoreBackupButton_OnClick"
                                                 Style="{StaticResource SecondaryButtonStyle}" />
                                     </StackPanel>
@@ -141,7 +144,7 @@
                                         <TextBlock Text="Журнал критичных действий"
                                                    Style="{StaticResource CardCaptionTextStyle}" />
                                         <TextBlock Margin="0,8,0,0"
-                                                   Text="Audit trail"
+                                                   Text="Журнал аудита"
                                                    Style="{StaticResource PageTitleTextStyle}"
                                                    FontSize="24" />
                                     </StackPanel>

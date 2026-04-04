@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -13,7 +13,7 @@ public partial class AdministrationPage : Page, INotifyPropertyChanged
 {
     private readonly IBackupService _backupService;
     private readonly IAuditService _auditService;
-    private string _backupComment = "Manual backup before critical changes";
+    private string _backupComment = "Ручная резервная копия перед критическими изменениями";
     private string _auditFilterText = string.Empty;
     private BackupSnapshotItem? _selectedBackup;
 
@@ -61,11 +61,11 @@ public partial class AdministrationPage : Page, INotifyPropertyChanged
         }
     }
 
-    public string BackupTitle => Backups.Count == 0 ? "No backups yet" : "Backup management";
+    public string BackupTitle => Backups.Count == 0 ? "Резервных копий пока нет" : "Управление резервными копиями";
 
-    public string BackupSummary => $"{Backups.Count} backup files";
+    public string BackupSummary => $"{Backups.Count} файлов резервных копий";
 
-    public string AuditSummary => $"{FilteredEntries.Count} records";
+    public string AuditSummary => $"{FilteredEntries.Count} записей";
 
     private IReadOnlyList<AuditLogItem> _cachedAuditEntries = [];
 
@@ -92,7 +92,7 @@ public partial class AdministrationPage : Page, INotifyPropertyChanged
                     FullPath = backup.FullPath,
                     CreatedAt = backup.CreatedAtUtc.ToLocalTime(),
                     CreatedBy = backup.CreatedByUserDisplayName,
-                    Status = backup.RestoredAtUtc.HasValue ? "Restored" : "Ready"
+                    Status = backup.RestoredAtUtc.HasValue ? "Восстановлена" : "Готова"
                 });
             }
 
@@ -101,10 +101,10 @@ public partial class AdministrationPage : Page, INotifyPropertyChanged
                 {
                     Id = x.Id,
                     OccurredAt = x.CreatedAtUtc.ToLocalTime(),
-                    Actor = x.UserDisplayName ?? "System",
-                    Action = x.ActionType,
-                    Target = string.IsNullOrWhiteSpace(x.EntityId) ? x.EntityType : $"{x.EntityType} #{x.EntityId}",
-                    Details = x.Details,
+                    Actor = x.UserDisplayName ?? "Система",
+                    Action = TranslateAction(x.ActionType),
+                    Target = TranslateTarget(x.EntityType, x.EntityId),
+                    Details = TranslateDetails(x.Details),
                     Severity = GetSeverity(x.ActionType)
                 })
                 .ToList();
@@ -116,7 +116,7 @@ public partial class AdministrationPage : Page, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Administration", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Администрирование", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -130,15 +130,15 @@ public partial class AdministrationPage : Page, INotifyPropertyChanged
             if (!string.IsNullOrWhiteSpace(BackupComment))
             {
                 MessageBox.Show(
-                    "Backup created. Note: the backend contract does not persist custom backup comments yet.",
-                    "Administration",
+                    "Резервная копия создана. Примечание: backend пока не сохраняет пользовательские комментарии к резервным копиям.",
+                    "Администрирование",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
             }
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Administration", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Администрирование", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -146,13 +146,13 @@ public partial class AdministrationPage : Page, INotifyPropertyChanged
     {
         if (SelectedBackup is null)
         {
-            MessageBox.Show("Select a backup first.", "Administration", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Сначала выберите резервную копию.", "Администрирование", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         if (MessageBox.Show(
-                $"Restore backup {SelectedBackup.Name}?",
-                "Administration",
+                $"Восстановить резервную копию {SelectedBackup.Name}?",
+                "Администрирование",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question) != MessageBoxResult.Yes)
         {
@@ -166,7 +166,7 @@ public partial class AdministrationPage : Page, INotifyPropertyChanged
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Administration", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Администрирование", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -199,6 +199,49 @@ public partial class AdministrationPage : Page, INotifyPropertyChanged
         }
 
         return "Info";
+    }
+
+    private static string TranslateAction(string actionType) => actionType switch
+    {
+        "Auth.Login" => "Вход в систему",
+        "Auth.Logout" => "Выход из системы",
+        "User.Created" => "Пользователь создан",
+        "User.Updated" => "Пользователь обновлён",
+        "User.Deleted" => "Пользователь удалён",
+        "Backup.Created" => "Резервная копия создана",
+        "Backup.Restored" => "Резервная копия восстановлена",
+        _ => actionType
+    };
+
+    private static string TranslateTarget(string entityType, string? entityId)
+    {
+        var entityName = entityType switch
+        {
+            "User" => "Пользователь",
+            "BackupEntry" => "Резервная копия",
+            "Product" => "Товар",
+            "InventorySession" => "Инвентаризация",
+            "StockDocument" => "Складской документ",
+            _ => entityType
+        };
+
+        return string.IsNullOrWhiteSpace(entityId) ? entityName : $"{entityName} #{entityId}";
+    }
+
+    private static string TranslateDetails(string details)
+    {
+        if (string.IsNullOrWhiteSpace(details))
+        {
+            return string.Empty;
+        }
+
+        return details
+            .Replace("User logged out.", "Пользователь вышел из системы.", StringComparison.Ordinal)
+            .Replace("Restored backup", "Восстановлена резервная копия", StringComparison.Ordinal)
+            .Replace("created with role", "создан с ролью", StringComparison.Ordinal)
+            .Replace("updated.", "обновлён.", StringComparison.Ordinal)
+            .Replace("deleted.", "удалён.", StringComparison.Ordinal)
+            .Replace("logged in.", "вошёл в систему.", StringComparison.Ordinal);
     }
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
