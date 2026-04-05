@@ -74,7 +74,7 @@
                                                        SummaryText="{Binding QueueSummary}"
                                                        SearchText="{Binding DocumentFilterText, UpdateSourceTrigger=PropertyChanged}"
                                                        ItemsSource="{Binding FilteredDocuments}"
-                                                       SelectedItem="{Binding SelectedDocument, Mode=TwoWay}" />
+                                                       SelectedItem="{Binding SelectedDocument, Mode=TwoWay}" Loaded="DocumentQueueControl_Loaded" />
 
                         <Border Grid.Column="2"
                                 Style="{StaticResource PanelCardStyle}"
@@ -185,9 +185,6 @@
 
                                     <TextBlock Text="Товар"
                                                Style="{StaticResource CardCaptionTextStyle}" />
-                                    <TextBlock Grid.Column="1"
-                                               Text="Комментарий "
-                                               Style="{StaticResource CardCaptionTextStyle}" />
                                     <TextBlock Grid.Column="2"
                                                Text="Кол-во"
                                                Style="{StaticResource CardCaptionTextStyle}" />
@@ -205,11 +202,7 @@
                                               SelectedItem="{Binding SelectedProduct, Mode=TwoWay}"
                                               DisplayMemberPath="DisplayName"
                                               Style="{StaticResource AppComboBoxStyle}" />
-                                    <TextBox x:Name="LineCommentTextBox"
-                                             Grid.Row="1"
-                                             Grid.Column="1"
-                                             Margin="0,6,12,0"
-                                             Style="{StaticResource AppTextBoxStyle}" />
+                                    
                                     <TextBox x:Name="LineQuantityTextBox"
                                              Grid.Row="1"
                                              Grid.Column="2"

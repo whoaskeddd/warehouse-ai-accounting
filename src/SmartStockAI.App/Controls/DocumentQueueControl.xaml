@@ -55,7 +55,7 @@
                     <DataGridTextColumn Header="Документ"
                                         ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding Number}" />
-                    <DataGridTextColumn Header="Контрагент"
+                    <DataGridTextColumn Header="Комментарий"
                                         ElementStyle="{StaticResource CenteredDataGridTextStyle}"
                                         Binding="{Binding CounterpartyName}" />
                     <DataGridTextColumn Header="Статус"

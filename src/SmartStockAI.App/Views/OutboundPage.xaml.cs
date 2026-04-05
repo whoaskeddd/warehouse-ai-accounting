@@ -312,13 +312,11 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
             Quantity = quantity,
             Unit = SelectedProduct.Unit,
             AvailableStock = SelectedProduct.AvailableStock,
-            Comment = LineCommentTextBox.Text.Trim(),
             HasShortage = shortage,
             ValidationMessage = shortage ? $"Нехватка {quantity - SelectedProduct.AvailableStock:0.##} {SelectedProduct.Unit}" : "OK"
         });
 
         LineQuantityTextBox.Text = string.Empty;
-        LineCommentTextBox.Text = string.Empty;
         OnPropertyChanged(nameof(TotalsText));
         OnPropertyChanged(nameof(ShortageSummary));
         OnPropertyChanged(nameof(WarningBadgeText));
@@ -671,5 +669,10 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private void DocumentQueueControl_Loaded(object sender, RoutedEventArgs e)
+    {
+
     }
 }
