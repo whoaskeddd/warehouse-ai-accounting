@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SmartStockAI.Core.Contracts.Auth;
+using SmartStockAI.Core.Contracts.AI;
 using SmartStockAI.Core.Contracts.Audit;
 using SmartStockAI.Core.Contracts.Backup;
 using SmartStockAI.Core.Contracts.Categories;
@@ -17,6 +18,7 @@ using SmartStockAI.App.Services;
 using SmartStockAI.Data.Context;
 using SmartStockAI.Data.Security;
 using SmartStockAI.Data.Services;
+using SmartStockAI.Data.Services.Ai;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -56,9 +58,11 @@ public partial class App : Application
                     context.Configuration.GetConnectionString("DefaultConnection"));
 
                 services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+                services.Configure<AiOptions>(context.Configuration.GetSection(AiOptions.SectionName));
                 services.AddSingleton<ICurrentUserAccessor, CurrentUserAccessor>();
                 services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
                 services.AddScoped<AppDataInitializer>();
+                services.AddScoped<IAiService, AiService>();
                 services.AddScoped<IAuditService, AuditService>();
                 services.AddScoped<IAuditLogWriter>(provider => (AuditService)provider.GetRequiredService<IAuditService>());
                 services.AddScoped<IAuthService, AuthService>();
@@ -96,6 +100,8 @@ public partial class App : Application
         dbContext.Database.Migrate();
         var initializer = scope.ServiceProvider.GetRequiredService<AppDataInitializer>();
         initializer.InitializeAsync().GetAwaiter().GetResult();
+        var aiService = scope.ServiceProvider.GetRequiredService<IAiService>();
+        aiService.InitializeAsync().GetAwaiter().GetResult();
         var loginWindow = Services.GetRequiredService<LoginWindow>();
         var loginResult = loginWindow.ShowDialog();
         if (loginResult != true)

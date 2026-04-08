@@ -22,6 +22,43 @@ public sealed class ProductService(
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<IReadOnlyList<ProductDto>> SearchAsync(SearchProductsRequest request, CancellationToken cancellationToken = default)
+    {
+        AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);
+
+        var query = dbContext.Products
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.SearchText))
+        {
+            var search = request.SearchText.Trim();
+            query = query.Where(x =>
+                x.Name.Contains(search) ||
+                x.Sku.Contains(search));
+        }
+
+        if (request.CategoryId.HasValue)
+        {
+            query = query.Where(x => x.CategoryId == request.CategoryId.Value);
+        }
+
+        if (request.SupplierId.HasValue)
+        {
+            query = query.Where(x => x.SupplierId == request.SupplierId.Value);
+        }
+
+        if (request.OnlyCritical)
+        {
+            query = query.Where(x => (x.CurrentStock - x.ReservedStock) <= x.MinStock);
+        }
+
+        return await query
+            .OrderBy(x => x.Name)
+            .Select(ToDtoExpression())
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<ProductDto?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         AuthorizationGuard.EnsureAuthenticated(currentUserAccessor);

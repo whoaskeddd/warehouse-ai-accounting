@@ -20,6 +20,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<DiscrepancyReport> DiscrepancyReports => Set<DiscrepancyReport>();
     public DbSet<BackupEntry> BackupEntries => Set<BackupEntry>();
     public DbSet<ImportedReportSnapshot> ImportedReportSnapshots => Set<ImportedReportSnapshot>();
+    public DbSet<ForecastSnapshot> ForecastSnapshots => Set<ForecastSnapshot>();
+    public DbSet<ModelTrainingInfo> ModelTrainingInfos => Set<ModelTrainingInfo>();
+    public DbSet<ExpectedInboundSnapshot> ExpectedInboundSnapshots => Set<ExpectedInboundSnapshot>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
