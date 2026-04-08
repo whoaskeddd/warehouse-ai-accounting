@@ -17,22 +17,22 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel>
-                        <TextBlock
-                                   Style="{StaticResource SectionEyebrowTextStyle}" ><Run Language="ru-ru" Text="КАТАЛОГ"/></TextBlock>
+                        <TextBlock Style="{StaticResource SectionEyebrowTextStyle}" Text="КАТАЛОГ" />
                         <TextBlock Margin="0,10,0,0"
                                    Text="Товары"
                                    Style="{StaticResource PageTitleTextStyle}" />
                         <TextBlock Margin="0,8,0,0"
-                                   Text="Рабочий экран каталога с поиском, фильтрами и базовой карточкой товара."
+                                   Text="Каталог с backend-поиском, AI-автокатегоризацией и прогнозом спроса по выбранному товару."
                                    Style="{StaticResource PageDescriptionTextStyle}" />
                     </StackPanel>
 
                     <Grid Grid.Row="1"
                           Margin="0,28,0,0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1.5*" />
+                            <ColumnDefinition Width="1.4*" />
                             <ColumnDefinition Width="220" />
                             <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="150" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
@@ -76,12 +76,23 @@
                                   SelectedValuePath="Id"
                                   SelectionChanged="FilterComboBox_OnSelectionChanged" />
 
-                        <StackPanel Grid.Column="3"
+                        <CheckBox x:Name="CriticalOnlyCheckBox"
+                                  Grid.Column="3"
+                                  Margin="16,0,0,0"
+                                  VerticalAlignment="Center"
+                                  Content="Только критичные"
+                                  Click="CriticalOnlyCheckBox_OnClick" />
+
+                        <StackPanel Grid.Column="4"
                                     Margin="16,0,0,0"
                                     Orientation="Horizontal">
                             <Button Content="Новый товар"
                                     Click="NewProductButton_OnClick"
                                     Style="{StaticResource PrimaryButtonStyle}" />
+                            <Button Margin="12,0,0,0"
+                                    Content="Пересчитать AI"
+                                    Click="RecalculateAiButton_OnClick"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
                             <Button Margin="12,0,0,0"
                                     Content="Обновить"
                                     Click="ReloadButton_OnClick"
@@ -92,14 +103,13 @@
                     <Grid Grid.Row="2"
                           Margin="0,24,0,0">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1.8*" />
+                            <ColumnDefinition Width="1.55*" />
                             <ColumnDefinition Width="22" />
-                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1.1*" />
                         </Grid.ColumnDefinitions>
 
                         <Border Grid.Column="0"
-                                Style="{StaticResource PanelCardStyle}"
-                                Margin="0">
+                                Style="{StaticResource PanelCardStyle}">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
@@ -164,13 +174,15 @@
                         </Border>
 
                         <Border Grid.Column="2"
-                                Style="{StaticResource PanelCardStyle}"
-                                Margin="0">
+                                Style="{StaticResource PanelCardStyle}">
                             <Grid>
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
                                     <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
@@ -208,7 +220,12 @@
                                     <TextBox x:Name="UnitTextBox" Grid.Row="1" Grid.Column="1" Margin="0,6,0,0" Style="{StaticResource AppTextBoxStyle}" />
 
                                     <TextBlock Grid.Row="2" Margin="0,16,0,0" Text="Наименование" Style="{StaticResource CardCaptionTextStyle}" />
-                                    <TextBox x:Name="NameTextBox" Grid.Row="3" Grid.ColumnSpan="2" Margin="0,6,0,0" Style="{StaticResource AppTextBoxStyle}" />
+                                    <TextBox x:Name="NameTextBox"
+                                             Grid.Row="3"
+                                             Grid.ColumnSpan="2"
+                                             Margin="0,6,0,0"
+                                             Style="{StaticResource AppTextBoxStyle}"
+                                             TextChanged="NameTextBox_OnTextChanged" />
 
                                     <TextBlock Grid.Row="4" Margin="0,16,0,0" Text="Категория" Style="{StaticResource CardCaptionTextStyle}" />
                                     <ComboBox x:Name="CategoryEditorComboBox"
@@ -273,7 +290,86 @@
                                     </StackPanel>
                                 </Grid>
 
-                                <StackPanel Grid.Row="3"
+                                <Border Grid.Row="3"
+                                        Margin="0,18,0,0"
+                                        Padding="14"
+                                        Background="#FFF8FAFD"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="16">
+                                    <StackPanel>
+                                        <TextBlock Text="AI-категоризация"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBlock x:Name="SuggestionTextBlock"
+                                                   Margin="0,8,0,0"
+                                                   Text="AI-рекомендация появится после обучения модели."
+                                                   TextWrapping="Wrap"
+                                                   Style="{StaticResource PageDescriptionTextStyle}" />
+                                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                            <Button x:Name="ApplySuggestedCategoryButton"
+                                                    Content="Применить"
+                                                    Click="ApplySuggestedCategoryButton_OnClick"
+                                                    IsEnabled="False"
+                                                    Style="{StaticResource SecondaryButtonStyle}" />
+                                            <Button x:Name="IgnoreSuggestedCategoryButton"
+                                                    Margin="12,0,0,0"
+                                                    Content="Игнорировать"
+                                                    Click="IgnoreSuggestedCategoryButton_OnClick"
+                                                    IsEnabled="False"
+                                                    Style="{StaticResource SecondaryButtonStyle}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Row="4"
+                                        Margin="0,18,0,0"
+                                        Padding="14"
+                                        Background="#FFF8FAFD"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="16">
+                                    <StackPanel>
+                                        <TextBlock Text="AI-аналитика товара"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBlock x:Name="AnalyticsSummaryText"
+                                                   Margin="0,8,0,0"
+                                                   Text="Выбери товар, чтобы увидеть историю и прогноз."
+                                                   TextWrapping="Wrap"
+                                                   Style="{StaticResource PageDescriptionTextStyle}" />
+                                        <TextBlock x:Name="AnalyticsMetaText"
+                                                   Margin="0,6,0,0"
+                                                   Text=""
+                                                   Foreground="{StaticResource TextSecondaryBrush}" />
+                                    </StackPanel>
+                                </Border>
+
+                                <DataGrid x:Name="ForecastDataGrid"
+                                          Grid.Row="5"
+                                          Margin="0,18,0,0"
+                                          AutoGenerateColumns="False"
+                                          CanUserAddRows="False"
+                                          HeadersVisibility="Column"
+                                          IsReadOnly="True"
+                                          Style="{StaticResource AppDataGridStyle}">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Период"
+                                                            Binding="{Binding Period, StringFormat=MM.yyyy}"
+                                                            ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                        <DataGridTextColumn Header="Значение"
+                                                            Binding="{Binding Quantity}"
+                                                            ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                        <DataGridTextColumn Header="Нижняя"
+                                                            Binding="{Binding LowerBound}"
+                                                            ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                        <DataGridTextColumn Header="Верхняя"
+                                                            Binding="{Binding UpperBound}"
+                                                            ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                        <DataGridCheckBoxColumn Header="Прогноз"
+                                                                Binding="{Binding IsForecast}" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+
+                                <StackPanel Grid.Row="6"
                                             Margin="0,18,0,0"
                                             Orientation="Horizontal"
                                             HorizontalAlignment="Right">

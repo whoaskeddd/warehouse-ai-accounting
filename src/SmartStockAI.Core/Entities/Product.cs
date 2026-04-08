@@ -21,4 +21,5 @@ public class Product
     public ICollection<StockMovement> StockMovements { get; set; } = new List<StockMovement>();
     public ICollection<StockDocumentLine> StockDocumentLines { get; set; } = new List<StockDocumentLine>();
     public ICollection<StockReservation> StockReservations { get; set; } = new List<StockReservation>();
+    public ICollection<ExpectedInboundSnapshot> ExpectedInboundSnapshots { get; set; } = new List<ExpectedInboundSnapshot>();
 }

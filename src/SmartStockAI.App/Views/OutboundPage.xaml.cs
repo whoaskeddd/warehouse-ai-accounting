@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+п»їusing System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -27,7 +27,7 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
     private string _documentNumber = string.Empty;
     private string _recipientName = string.Empty;
     private string _documentComment = string.Empty;
-    private string _documentStatus = "Черновик";
+    private string _documentStatus = "Р§РµСЂРЅРѕРІРёРє";
     private int? _currentDocumentId;
     private bool _isRefreshingSelection;
 
@@ -148,25 +148,25 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
         }
     }
 
-    public string QueueHeadline => SelectedDocument is null ? "Список документов" : $"Активный: {SelectedDocument.Number}";
+    public string QueueHeadline => SelectedDocument is null ? "РЎРїРёСЃРѕРє РґРѕРєСѓРјРµРЅС‚РѕРІ" : $"РђРєС‚РёРІРЅС‹Р№: {SelectedDocument.Number}";
 
-    public string QueueSummary => $"{FilteredDocuments.Count} документов";
+    public string QueueSummary => $"{FilteredDocuments.Count} РґРѕРєСѓРјРµРЅС‚РѕРІ";
 
-    public string EditorTitle => $"{DocumentStatus} · {DocumentNumber}";
+    public string EditorTitle => $"{DocumentStatus} В· {DocumentNumber}";
 
-    public string TotalsText => $"Строк: {Lines.Count} · К выдаче: {Lines.Sum(x => x.Quantity).ToString("0.##", CultureInfo.InvariantCulture)}";
+    public string TotalsText => $"РЎС‚СЂРѕРє: {Lines.Count} В· Рљ РІС‹РґР°С‡Рµ: {Lines.Sum(x => x.Quantity).ToString("0.##", CultureInfo.InvariantCulture)}";
 
-    public string HistorySummary => $"{FilteredHistory.Count} движений";
+    public string HistorySummary => $"{FilteredHistory.Count} РґРІРёР¶РµРЅРёР№";
 
     public string ShortageSummary =>
         Lines.Any(x => x.HasShortage)
-            ? "Есть строки, которые нельзя провести из-за нехватки остатка. Исправь количество или замени товар."
-            : "Нехватки по текущему документу не обнаружено.";
+            ? "Р•СЃС‚СЊ СЃС‚СЂРѕРєРё, РєРѕС‚РѕСЂС‹Рµ РЅРµР»СЊР·СЏ РїСЂРѕРІРµСЃС‚Рё РёР·-Р·Р° РЅРµС…РІР°С‚РєРё РѕСЃС‚Р°С‚РєР°. РСЃРїСЂР°РІСЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РёР»Рё Р·Р°РјРµРЅРё С‚РѕРІР°СЂ."
+            : "РќРµС…РІР°С‚РєРё РїРѕ С‚РµРєСѓС‰РµРјСѓ РґРѕРєСѓРјРµРЅС‚Сѓ РЅРµ РѕР±РЅР°СЂСѓР¶РµРЅРѕ.";
 
-    public string WarningBadgeText => $"{Lines.Count(x => x.HasShortage)} проблем";
+    public string WarningBadgeText => $"{Lines.Count(x => x.HasShortage)} РїСЂРѕР±Р»РµРј";
 
     public string SelectedProductStockText => SelectedProduct is null
-        ? "Выбери товар"
+        ? "Р’С‹Р±РµСЂРё С‚РѕРІР°СЂ"
         : $"{SelectedProduct.AvailableStock:0.##} {SelectedProduct.Unit}";
 
     public string SelectedValidationText
@@ -175,32 +175,32 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
         {
             if (SelectedProduct is null)
             {
-                return "Нет проверки";
+                return "РќРµС‚ РїСЂРѕРІРµСЂРєРё";
             }
 
             if (!TryParseDecimal(LineQuantityTextBox?.Text, out var quantity))
             {
-                return "Введи количество";
+                return "Р’РІРµРґРё РєРѕР»РёС‡РµСЃС‚РІРѕ";
             }
 
             return quantity <= SelectedProduct.AvailableStock
-                ? "Остатка достаточно"
-                : $"Нехватка {quantity - SelectedProduct.AvailableStock:0.##} {SelectedProduct.Unit}";
+                ? "РћСЃС‚Р°С‚РєР° РґРѕСЃС‚Р°С‚РѕС‡РЅРѕ"
+                : $"РќРµС…РІР°С‚РєР° {quantity - SelectedProduct.AvailableStock:0.##} {SelectedProduct.Unit}";
         }
     }
 
     public Brush SelectedValidationBackground =>
-        SelectedValidationText.StartsWith("Нехватка", StringComparison.Ordinal)
+        SelectedValidationText.StartsWith("РќРµС…РІР°С‚РєР°", StringComparison.Ordinal)
             ? new SolidColorBrush(Color.FromRgb(254, 242, 242))
             : new SolidColorBrush(Color.FromRgb(240, 253, 244));
 
     public Brush SelectedValidationBorder =>
-        SelectedValidationText.StartsWith("Нехватка", StringComparison.Ordinal)
+        SelectedValidationText.StartsWith("РќРµС…РІР°С‚РєР°", StringComparison.Ordinal)
             ? new SolidColorBrush(Color.FromRgb(254, 205, 211))
             : new SolidColorBrush(Color.FromRgb(187, 247, 208));
 
     public Brush SelectedValidationForeground =>
-        SelectedValidationText.StartsWith("Нехватка", StringComparison.Ordinal)
+        SelectedValidationText.StartsWith("РќРµС…РІР°С‚РєР°", StringComparison.Ordinal)
             ? new SolidColorBrush(Color.FromRgb(180, 35, 24))
             : new SolidColorBrush(Color.FromRgb(21, 128, 61));
 
@@ -285,63 +285,77 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
 
     private async void AddLineButton_OnClick(object sender, RoutedEventArgs e)
     {
-        if (SelectedProduct is null)
+        try
         {
-            MessageBox.Show("Выбери товар для строки расхода.", "Расход", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
+            if (SelectedProduct is null)
+            {
+                MessageBox.Show("Р’С‹Р±РµСЂРё С‚РѕРІР°СЂ РґР»СЏ СЃС‚СЂРѕРєРё СЂР°СЃС…РѕРґР°.", "Р Р°СЃС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!TryParseDecimal(LineQuantityTextBox.Text, out var quantity))
+            {
+                MessageBox.Show("РљРѕР»РёС‡РµСЃС‚РІРѕ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ С‡РёСЃР»РѕРј.", "Р Р°СЃС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (quantity <= 0)
+            {
+                MessageBox.Show("РљРѕР»РёС‡РµСЃС‚РІРѕ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ Р±РѕР»СЊС€Рµ РЅСѓР»СЏ.", "Р Р°СЃС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var shortage = quantity > SelectedProduct.AvailableStock;
+            Lines.Add(new DocumentLineItem
+            {
+                LineNo = Lines.Count + 1,
+                Sku = SelectedProduct.Sku,
+                ProductName = SelectedProduct.Name,
+                Quantity = quantity,
+                Unit = SelectedProduct.Unit,
+                AvailableStock = SelectedProduct.AvailableStock,
+                HasShortage = shortage,
+                ValidationMessage = shortage ? $"РќРµС…РІР°С‚РєР° {quantity - SelectedProduct.AvailableStock:0.##} {SelectedProduct.Unit}" : "OK"
+            });
+
+            LineQuantityTextBox.Text = string.Empty;
+            OnPropertyChanged(nameof(TotalsText));
+            OnPropertyChanged(nameof(ShortageSummary));
+            OnPropertyChanged(nameof(WarningBadgeText));
+            UpdateSelectedValidation();
+
+            await SaveDraftAsync();
         }
-
-        if (!TryParseDecimal(LineQuantityTextBox.Text, out var quantity))
+        catch (Exception ex)
         {
-            MessageBox.Show("Количество должно быть числом.", "Расход", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
+            MessageBox.Show(ex.Message, "Р Р°СЃС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Error);
         }
-
-        if (quantity <= 0)
-        {
-            MessageBox.Show("Количество должно быть больше нуля.", "Расход", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
-
-        var shortage = quantity > SelectedProduct.AvailableStock;
-        Lines.Add(new DocumentLineItem
-        {
-            LineNo = Lines.Count + 1,
-            Sku = SelectedProduct.Sku,
-            ProductName = SelectedProduct.Name,
-            Quantity = quantity,
-            Unit = SelectedProduct.Unit,
-            AvailableStock = SelectedProduct.AvailableStock,
-            HasShortage = shortage,
-            ValidationMessage = shortage ? $"Нехватка {quantity - SelectedProduct.AvailableStock:0.##} {SelectedProduct.Unit}" : "OK"
-        });
-
-        LineQuantityTextBox.Text = string.Empty;
-        OnPropertyChanged(nameof(TotalsText));
-        OnPropertyChanged(nameof(ShortageSummary));
-        OnPropertyChanged(nameof(WarningBadgeText));
-        UpdateSelectedValidation();
-
-        await SaveDraftAsync();
     }
 
     private async void RemoveLineButton_OnClick(object sender, RoutedEventArgs e)
     {
-        if (SelectedLine is null)
+        try
         {
-            return;
+            if (SelectedLine is null)
+            {
+                return;
+            }
+
+            Lines.Remove(SelectedLine);
+            ResequenceLines();
+            RecalculateShortages();
+            OnPropertyChanged(nameof(TotalsText));
+            OnPropertyChanged(nameof(ShortageSummary));
+            OnPropertyChanged(nameof(WarningBadgeText));
+
+            if (_currentDocumentId.HasValue)
+            {
+                await SaveDraftAsync();
+            }
         }
-
-        Lines.Remove(SelectedLine);
-        ResequenceLines();
-        RecalculateShortages();
-        OnPropertyChanged(nameof(TotalsText));
-        OnPropertyChanged(nameof(ShortageSummary));
-        OnPropertyChanged(nameof(WarningBadgeText));
-
-        if (_currentDocumentId.HasValue)
+        catch (Exception ex)
         {
-            await SaveDraftAsync();
+            MessageBox.Show(ex.Message, "Р Р°СЃС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -349,13 +363,13 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
     {
         if (Lines.Count == 0)
         {
-            MessageBox.Show("Добавь хотя бы одну строку перед проведением.", "Расход", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Р”РѕР±Р°РІСЊ С…РѕС‚СЏ Р±С‹ РѕРґРЅСѓ СЃС‚СЂРѕРєСѓ РїРµСЂРµРґ РїСЂРѕРІРµРґРµРЅРёРµРј.", "Р Р°СЃС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         if (Lines.Any(x => x.HasShortage))
         {
-            MessageBox.Show("В документе есть строки с нехваткой остатка. Проведение заблокировано.", "Расход", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show("Р’ РґРѕРєСѓРјРµРЅС‚Рµ РµСЃС‚СЊ СЃС‚СЂРѕРєРё СЃ РЅРµС…РІР°С‚РєРѕР№ РѕСЃС‚Р°С‚РєР°. РџСЂРѕРІРµРґРµРЅРёРµ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРѕ.", "Р Р°СЃС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
@@ -369,11 +383,11 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
             }
 
             await ReloadAfterMutationAsync(posted.Id);
-            MessageBox.Show("Документ расхода проведен.", "Расход", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show("Р”РѕРєСѓРјРµРЅС‚ СЂР°СЃС…РѕРґР° РїСЂРѕРІРµРґРµРЅ.", "Р Р°СЃС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Расход", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(ex.Message, "Р Р°СЃС…РѕРґ", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -427,8 +441,8 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
         SelectedDocument = null;
         _isRefreshingSelection = false;
         DocumentNumber = CreateDefaultDocumentNumber("OUT");
-        RecipientName = "Ручная выдача";
-        DocumentStatus = "Черновик";
+        RecipientName = "Р СѓС‡РЅР°СЏ РІС‹РґР°С‡Р°";
+        DocumentStatus = "Р§РµСЂРЅРѕРІРёРє";
         DocumentComment = string.Empty;
         Lines.Clear();
         SelectedLine = null;
@@ -443,7 +457,7 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
     {
         _currentDocumentId = document.Id;
         DocumentNumber = document.Number;
-        RecipientName = document.Comment ?? "Ручная выдача";
+        RecipientName = document.Comment ?? "Р СѓС‡РЅР°СЏ РІС‹РґР°С‡Р°";
         DocumentComment = document.Comment ?? string.Empty;
         DocumentStatus = MapStatus(document.Status);
 
@@ -460,11 +474,11 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
                 Sku = line.ProductSku,
                 ProductName = line.ProductName,
                 Quantity = line.Quantity,
-                Unit = product?.Unit ?? "шт",
+                Unit = product?.Unit ?? "С€С‚",
                 AvailableStock = availableStock,
                 Comment = line.Comment ?? string.Empty,
                 HasShortage = shortage,
-                ValidationMessage = shortage ? $"Нехватка {line.Quantity - availableStock:0.##} {(product?.Unit ?? "шт")}" : "OK"
+                ValidationMessage = shortage ? $"РќРµС…РІР°С‚РєР° {line.Quantity - availableStock:0.##} {(product?.Unit ?? "С€С‚")}" : "OK"
             });
         }
 
@@ -487,7 +501,7 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
 
             if (updated is null)
             {
-                throw new InvalidOperationException("Черновик документа не найден.");
+                throw new InvalidOperationException("Р§РµСЂРЅРѕРІРёРє РґРѕРєСѓРјРµРЅС‚Р° РЅРµ РЅР°Р№РґРµРЅ.");
             }
 
             DocumentNumber = updated.Number;
@@ -569,7 +583,7 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
             line.AvailableStock = product.AvailableStock;
             line.HasShortage = line.Quantity > product.AvailableStock;
             line.ValidationMessage = line.HasShortage
-                ? $"Нехватка {line.Quantity - product.AvailableStock:0.##} {product.Unit}"
+                ? $"РќРµС…РІР°С‚РєР° {line.Quantity - product.AvailableStock:0.##} {product.Unit}"
                 : "OK";
         }
 
@@ -607,7 +621,7 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
         {
             Id = document.Id,
             Number = document.Number,
-            CounterpartyName = string.IsNullOrWhiteSpace(document.Comment) ? "Без получателя" : document.Comment,
+            CounterpartyName = string.IsNullOrWhiteSpace(document.Comment) ? "Р‘РµР· РїРѕР»СѓС‡Р°С‚РµР»СЏ" : document.Comment,
             Status = MapStatus(document.Status),
             CreatedAt = document.CreatedAt.ToLocalTime(),
             LinesCount = document.TotalItems,
@@ -633,25 +647,25 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
 
     private static string MapStatus(StockDocumentStatus status) => status switch
     {
-        StockDocumentStatus.Draft => "Черновик",
-        StockDocumentStatus.Posted => "Проведен",
-        StockDocumentStatus.Cancelled => "Отменен",
+        StockDocumentStatus.Draft => "Р§РµСЂРЅРѕРІРёРє",
+        StockDocumentStatus.Posted => "РџСЂРѕРІРµРґРµРЅ",
+        StockDocumentStatus.Cancelled => "РћС‚РјРµРЅРµРЅ",
         _ => status.ToString()
     };
 
     private static string MapMovementType(StockMovementType type) => type switch
     {
-        StockMovementType.Receipt => "Приход",
-        StockMovementType.Issue => "Расход",
-        StockMovementType.Reservation => "Резерв",
-        StockMovementType.ReservationRelease => "Снятие резерва",
-        StockMovementType.Adjustment => "Корректировка",
+        StockMovementType.Receipt => "РџСЂРёС…РѕРґ",
+        StockMovementType.Issue => "Р Р°СЃС…РѕРґ",
+        StockMovementType.Reservation => "Р РµР·РµСЂРІ",
+        StockMovementType.ReservationRelease => "РЎРЅСЏС‚РёРµ СЂРµР·РµСЂРІР°",
+        StockMovementType.Adjustment => "РљРѕСЂСЂРµРєС‚РёСЂРѕРІРєР°",
         _ => type.ToString()
     };
 
     private static string CreateDefaultDocumentNumber(string prefix)
     {
-        return $"{prefix}-{DateTime.Now:yyyyMMdd-HH:mm}";
+        return $"{prefix}-{DateTime.Now:yyyyMMdd-HHmmss}";
     }
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
@@ -676,3 +690,4 @@ public partial class OutboundPage : Page, INotifyPropertyChanged
 
     }
 }
+
