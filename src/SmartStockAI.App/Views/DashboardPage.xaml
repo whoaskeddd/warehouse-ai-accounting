@@ -1,0 +1,428 @@
+<Page x:Class="SmartStockAI.App.Views.DashboardPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Background="Transparent"
+      Title="Дашборд">
+    <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
+        <Grid Margin="0,0,0,8">
+            <Border Style="{StaticResource PageContainerStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Style="{StaticResource SectionEyebrowTextStyle}"
+                               Text="ПАНЕЛЬ УПРАВЛЕНИЯ" />
+                    <TextBlock Grid.Row="1"
+                               Margin="0,10,0,0"
+                               Text="Дашборд"
+                               Style="{StaticResource PageTitleTextStyle}" />
+                    <TextBlock Grid.Row="2"
+                               Margin="0,8,0,0"
+                               Text="Последние движения по складу, сигналы дефицита и закупочные рекомендации из AI-слоя."
+                               Style="{StaticResource PageDescriptionTextStyle}" />
+
+                    <Grid Grid.Row="3"
+                          Margin="0,28,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Создать приход"
+                                        Click="OpenInboundButton_OnClick"
+                                        Style="{StaticResource PrimaryButtonStyle}" />
+                                <Button Margin="12,0,0,0"
+                                        Content="Открыть расход"
+                                        Click="OpenOutboundButton_OnClick"
+                                        Style="{StaticResource SecondaryButtonStyle}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1"
+                                        Orientation="Horizontal">
+                                <Button Content="Пересчитать AI"
+                                        Click="RecalculateForecastButton_OnClick"
+                                        Style="{StaticResource SecondaryButtonStyle}" />
+                                <Button Margin="12,0,0,0"
+                                        Content="Обновить"
+                                        Click="RefreshButton_OnClick"
+                                        Style="{StaticResource SecondaryButtonStyle}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid Grid.Row="1"
+                              Margin="0,24,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2.3*" />
+                                <ColumnDefinition Width="1.15*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel>
+                                <UniformGrid Columns="3">
+                                    <Border Style="{StaticResource StatCardStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="Критичные остатки"
+                                                       Style="{StaticResource CardCaptionTextStyle}" />
+                                            <TextBlock Margin="0,10,0,0"
+                                                       Text="{Binding CriticalStockCount}"
+                                                       Style="{StaticResource CardValueTextStyle}" />
+                                            <TextBlock Margin="0,12,0,0"
+                                                       Text="Позиции, где доступный остаток на минимуме или ниже."
+                                                       Style="{StaticResource PlaceholderTextStyle}" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource StatCardStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="Движения сегодня"
+                                                       Style="{StaticResource CardCaptionTextStyle}" />
+                                            <TextBlock Margin="0,10,0,0"
+                                                       Text="{Binding TodayMovementsCount}"
+                                                       Style="{StaticResource CardValueTextStyle}" />
+                                            <TextBlock Margin="0,12,0,0"
+                                                       Text="Все приходные, расходные и резервные операции за день."
+                                                       Style="{StaticResource PlaceholderTextStyle}" />
+                                        </StackPanel>
+                                    </Border>
+                                    <Border Style="{StaticResource StatCardStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="Черновики документов"
+                                                       Style="{StaticResource CardCaptionTextStyle}" />
+                                            <TextBlock Margin="0,10,0,0"
+                                                       Text="{Binding DraftDocumentsCount}"
+                                                       Style="{StaticResource CardValueTextStyle}" />
+                                            <TextBlock Margin="0,12,0,0"
+                                                       Text="{Binding ForecastStatus}"
+                                                       Style="{StaticResource PlaceholderTextStyle}" />
+                                        </StackPanel>
+                                    </Border>
+                                </UniformGrid>
+
+                                <Grid Margin="0,20,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0"
+                                            Margin="0,0,10,0"
+                                            Style="{StaticResource PanelCardStyle}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+
+                                            <StackPanel>
+                                                <TextBlock Text="Дефицит и критичные позиции"
+                                                           Style="{StaticResource CardCaptionTextStyle}" />
+                                                <TextBlock Margin="0,8,0,0"
+                                                           Text="AI-сигналы по остаткам"
+                                                           Style="{StaticResource PageTitleTextStyle}"
+                                                           FontSize="24" />
+                                            </StackPanel>
+
+                                            <DataGrid Grid.Row="1"
+                                                      Margin="0,18,0,0"
+                                                      ItemsSource="{Binding CriticalItems}"
+                                                      AutoGenerateColumns="False"
+                                                      CanUserAddRows="False"
+                                                      HeadersVisibility="Column"
+                                                      IsReadOnly="True"
+                                                      Style="{StaticResource AppDataGridStyle}">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="SKU"
+                                                                        Binding="{Binding Sku}"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                                    <DataGridTextColumn Header="Товар"
+                                                                        Width="2*"
+                                                                        Binding="{Binding ProductName}"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                                    <DataGridTextColumn Header="Доступно"
+                                                                        Binding="{Binding AvailableStock}"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                                    <DataGridTextColumn Header="Прогноз/мес"
+                                                                        Binding="{Binding MonthlyForecast}"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                                    <DataGridTextColumn Header="Дефицит"
+                                                                        Binding="{Binding ProjectedDeficit}"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                                    <DataGridTextColumn Header="Заказать"
+                                                                        Binding="{Binding RecommendedOrder}"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </Grid>
+                                    </Border>
+
+                                    <Border Grid.Column="1"
+                                            Margin="10,0,0,0"
+                                            Style="{StaticResource PanelCardStyle}">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+
+                                            <StackPanel>
+                                                <TextBlock Text="Закупочные рекомендации"
+                                                           Style="{StaticResource CardCaptionTextStyle}" />
+                                                <TextBlock Margin="0,8,0,0"
+                                                           Text="Что заказать сейчас"
+                                                           Style="{StaticResource PageTitleTextStyle}"
+                                                           FontSize="24" />
+                                            </StackPanel>
+
+                                            <DataGrid Grid.Row="1"
+                                                      Margin="0,18,0,0"
+                                                      ItemsSource="{Binding PurchaseRecommendations}"
+                                                      AutoGenerateColumns="False"
+                                                      CanUserAddRows="False"
+                                                      HeadersVisibility="Column"
+                                                      IsReadOnly="True"
+                                                      Style="{StaticResource AppDataGridStyle}">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="SKU"
+                                                                        Binding="{Binding Sku}"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                                    <DataGridTextColumn Header="Товар"
+                                                                        Width="2*"
+                                                                        Binding="{Binding ProductName}"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                                    <DataGridTextColumn Header="Остаток"
+                                                                        Binding="{Binding CurrentStock}"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                                    <DataGridTextColumn Header="Приход"
+                                                                        Binding="{Binding ExpectedInbound}"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                                    <DataGridTextColumn Header="Страховой"
+                                                                        Binding="{Binding SafetyStock}"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                                    <DataGridTextColumn Header="Заказ"
+                                                                        Binding="{Binding RecommendedOrder}"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}" />
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+
+                                <Border Margin="0,20,0,0"
+                                        Style="{StaticResource PanelCardStyle}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel>
+                                                <TextBlock Text="Последние движения"
+                                                           Style="{StaticResource CardCaptionTextStyle}" />
+                                                <TextBlock Margin="0,8,0,0"
+                                                           Text="Живая лента операций"
+                                                           Style="{StaticResource PageTitleTextStyle}"
+                                                           FontSize="24" />
+                                            </StackPanel>
+
+                                            <Border Grid.Column="1"
+                                                    Style="{StaticResource PillBadgeStyle}"
+                                                    VerticalAlignment="Top">
+                                                <TextBlock Text="{Binding RecentMovementsSummary}"
+                                                           Foreground="{StaticResource TextSecondaryBrush}" />
+                                            </Border>
+                                        </Grid>
+
+                                        <TextBlock Grid.Row="1"
+                                                   Margin="0,8,0,0"
+                                                   Text="Показываются последние движения с типом операции, документом и остатком после проведения."
+                                                   Style="{StaticResource PageDescriptionTextStyle}" />
+
+                                        <Border Grid.Row="2"
+                                                Margin="0,18,0,0"
+                                                Padding="4"
+                                                Background="#FFF8FAFD"
+                                                BorderBrush="{StaticResource BorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="18">
+                                            <DataGrid ItemsSource="{Binding RecentMovements}"
+                                                      AutoGenerateColumns="False"
+                                                      CanUserAddRows="False"
+                                                      HeadersVisibility="Column"
+                                                      IsReadOnly="True"
+                                                      Style="{StaticResource AppDataGridStyle}">
+                                                <DataGrid.Columns>
+                                                    <DataGridTextColumn Header="Дата"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding OccurredAt, StringFormat=dd.MM.yyyy HH:mm}" />
+                                                    <DataGridTextColumn Header="SKU"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding Sku}" />
+                                                    <DataGridTextColumn Header="Товар"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding ProductName}" />
+                                                    <DataGridTextColumn Header="Тип"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding MovementType}" />
+                                                    <DataGridTextColumn Header="Документ"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding DocumentNumber}" />
+                                                    <DataGridTextColumn Header="Кол-во"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding Quantity}" />
+                                                    <DataGridTextColumn Header="Остаток после"
+                                                                        ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                        Binding="{Binding BalanceAfter}" />
+                                                </DataGrid.Columns>
+                                            </DataGrid>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+
+                            <Border Grid.Column="1"
+                                    Margin="20,0,0,0"
+                                    Style="{StaticResource PanelCardStyle}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Text="AI-поле прогноза"
+                                               Style="{StaticResource CardCaptionTextStyle}" />
+                                    <TextBlock Grid.Row="1"
+                                               Margin="0,8,0,0"
+                                               Text="{Binding ForecastChartTitle}"
+                                               Style="{StaticResource PageTitleTextStyle}"
+                                               FontSize="24" />
+                                    <TextBlock Grid.Row="2"
+                                               Margin="0,10,0,0"
+                                               Text="{Binding ForecastChartSummary}"
+                                               Style="{StaticResource PageDescriptionTextStyle}" />
+
+                                    <Border Grid.Row="3"
+                                            Margin="0,18,0,0"
+                                            Padding="16"
+                                            Background="#FFFFFFFF"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="16">
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <ItemsControl ItemsSource="{Binding ForecastChartItems}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <UniformGrid Rows="1" />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Margin="4,0">
+                                                            <Grid.RowDefinitions>
+                                                                <RowDefinition Height="Auto" />
+                                                                <RowDefinition Height="*" />
+                                                                <RowDefinition Height="Auto" />
+                                                            </Grid.RowDefinitions>
+                                                            <TextBlock Text="{Binding Quantity, StringFormat={}{0:0.#}}"
+                                                                       HorizontalAlignment="Center"
+                                                                       Foreground="{StaticResource TextMutedBrush}"
+                                                                       FontSize="11" />
+                                                            <Grid Grid.Row="1"
+                                                                  Margin="0,10,0,8"
+                                                                  VerticalAlignment="Bottom"
+                                                                  Height="120">
+                                                                <Border VerticalAlignment="Bottom"
+                                                                        Height="{Binding Height}"
+                                                                        CornerRadius="8,8,4,4">
+                                                                    <Border.Style>
+                                                                        <Style TargetType="Border">
+                                                                            <Setter Property="Background" Value="#FFDCE6F5" />
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding IsForecast}" Value="True">
+                                                                                    <Setter Property="Background" Value="{StaticResource SecondaryAccentBrush}" />
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </Border.Style>
+                                                                </Border>
+                                                            </Grid>
+                                                            <TextBlock Grid.Row="2"
+                                                                       Text="{Binding Label}"
+                                                                       HorizontalAlignment="Center"
+                                                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                                                       FontSize="11" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+
+                                            <Grid Grid.Row="1"
+                                                  Margin="0,12,0,0">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Border Width="10"
+                                                            Height="10"
+                                                            CornerRadius="5"
+                                                            Background="#FFDCE6F5" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               Text="история"
+                                                               Foreground="{StaticResource TextMutedBrush}" />
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1"
+                                                            Margin="20,0,0,0"
+                                                            Orientation="Horizontal">
+                                                    <Border Width="10"
+                                                            Height="10"
+                                                            CornerRadius="5"
+                                                            Background="{StaticResource SecondaryAccentBrush}" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               Text="прогноз"
+                                                               Foreground="{StaticResource TextMutedBrush}" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+
+                                    <Button Grid.Row="4"
+                                            Margin="0,18,0,0"
+                                            Content="Перейти к товарам"
+                                            Click="OpenProductsButton_OnClick"
+                                            Style="{StaticResource PrimaryButtonStyle}" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</Page>

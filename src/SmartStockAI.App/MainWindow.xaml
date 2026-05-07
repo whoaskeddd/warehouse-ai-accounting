@@ -1,0 +1,138 @@
+<Window x:Class="SmartStockAI.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="SmartStock AI"
+        Width="1360"
+        Height="820"
+        MinWidth="1100"
+        MinHeight="700"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource AppBackgroundBrush}">
+    <Grid Background="{StaticResource CanvasGradientBrush}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Ellipse HorizontalAlignment="Right"
+                 VerticalAlignment="Top"
+                 Width="420"
+                 Height="420"
+                 Margin="0,-160,-120,0"
+                 Fill="#26C4B5FD"
+                 IsHitTestVisible="False" />
+        <Ellipse HorizontalAlignment="Left"
+                 VerticalAlignment="Bottom"
+                 Width="380"
+                 Height="380"
+                 Margin="-120,0,0,-170"
+                 Fill="#20B7E4D8"
+                 IsHitTestVisible="False" />
+
+        <Border Margin="20"
+                Background="{StaticResource SidebarBrush}"
+                BorderBrush="{StaticResource SidebarBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="28"
+                Effect="{StaticResource SoftShadowEffect}">
+            <DockPanel Margin="22">
+                <StackPanel DockPanel.Dock="Top"
+                            Margin="0,0,0,28">
+                    <TextBlock Style="{StaticResource SectionEyebrowTextStyle}"
+                               Text="СКЛАД ИИ" />
+                    <TextBlock Style="{StaticResource AppTitleTextStyle}"
+                               Width="225"
+                               Text="Умный склад ИИ" />
+                    <TextBlock Margin="0,6,0,0"
+                               MaxWidth="228"
+                               Style="{StaticResource AppSubtitleTextStyle}"
+                               ><Run Language="ru-ru" Text="Приложение"/><Run Text=" складского учета, инвентаризации и администрирования."/></TextBlock>
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Bottom"
+                            Margin="0,28,0,0">
+                    <Border x:Name="QuickActionCard"
+                            Style="{StaticResource PanelCardStyle}"
+                            Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Быстрое действие"
+                                       Style="{StaticResource CardCaptionTextStyle}" />
+                            <TextBlock Margin="0,8,0,0"
+                                       Text="Добавить товар"
+                                       Style="{StaticResource PageTitleTextStyle}"
+                                       FontSize="20"
+                                       MaxWidth="190" />
+                            <TextBlock Margin="0,8,0,0"
+                                       MaxWidth="210"
+                                       Text="Начни с наполнения каталога, затем переходи к документам движения."
+                                       Style="{StaticResource PageDescriptionTextStyle}" />
+                            <Button x:Name="OpenProductsButton"
+                                    Margin="0,18,0,0"
+                                    Content="Открыть товары"
+                                    Click="OpenProductsButton_OnClick"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource PanelCardStyle}">
+                        <StackPanel>
+                            <TextBlock Text="Активный пользователь"
+                                       Style="{StaticResource CardCaptionTextStyle}" />
+                            <TextBlock Margin="0,8,0,0"
+                                       Text="{Binding CurrentUserDisplay}"
+                                       Style="{StaticResource PageDescriptionTextStyle}" />
+                            <Button x:Name="OpenUsersButton"
+                                    Margin="0,16,0,0"
+                                    Content="Открыть пользователей"
+                                    Click="OpenUsersButton_OnClick"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                            <Button Margin="0,12,0,0"
+                                    Content="Выход"
+                                    Click="LogoutButton_OnClick"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <ListBox x:Name="NavigationList"
+                         SelectionChanged="NavigationList_OnSelectionChanged"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         Style="{StaticResource NavigationListStyle}">
+                    <ListBoxItem Tag="Dashboard"
+                                 Content="Дашборд" />
+                    <ListBoxItem Tag="Products"
+                                 Content="Товары" />
+                    <ListBoxItem Tag="Categories"
+                                 Content="Категории" />
+                    <ListBoxItem Tag="Suppliers"
+                                 Content="Поставщики" />
+                    <ListBoxItem Tag="Locations"
+                                 Content="Локации" />
+                    <ListBoxItem Tag="Inbound"
+                                 Content="Приход" />
+                    <ListBoxItem Tag="Outbound"
+                                 Content="Расход" />
+                    <ListBoxItem Tag="Inventory"
+                                 Content="Инвентаризация" />
+                    <ListBoxItem Tag="Users"
+                                 Content="Пользователи" />
+                    <ListBoxItem Tag="Administration"
+                                 Content="Backup и аудит" />
+                    <ListBoxItem Tag="Reports"
+                                 Content="Отчеты" />
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <Grid Grid.Column="1"
+              Margin="4,20,20,20">
+            <Frame x:Name="MainFrame"
+                   Background="Transparent"
+                   NavigationUIVisibility="Hidden" />
+        </Grid>
+    </Grid>
+</Window>

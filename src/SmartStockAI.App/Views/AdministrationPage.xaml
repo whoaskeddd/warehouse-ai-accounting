@@ -1,0 +1,196 @@
+﻿<Page x:Class="SmartStockAI.App.Views.AdministrationPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Background="Transparent"
+      Title="Администрирование">
+    <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
+        <Grid Margin="0,0,0,8">
+            <Border Style="{StaticResource PageContainerStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionEyebrowTextStyle}">
+                            <Run Language="ru-ru" Text="ИНСТРУМЕНТЫ УПРАВЛЕНИЯ" />
+                        </TextBlock>
+                        <TextBlock Margin="0,10,0,0"
+                                   Text="Резервные копии и журнал действий"
+                                   Style="{StaticResource PageTitleTextStyle}" />
+                        <TextBlock Margin="0,8,0,0"
+                                   Text="Страница для административных сценариев: ручное создание и восстановление резервных копий, а также просмотр журнала ключевых операций."
+                                   Style="{StaticResource PageDescriptionTextStyle}" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="1"
+                          Margin="0,28,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="20" />
+                            <ColumnDefinition Width="1.35*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Style="{StaticResource PanelCardStyle}"
+                                Margin="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel>
+                                        <TextBlock Text="Резервные копии"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBlock Margin="0,3,0,0"
+                                                   Text="{Binding BackupTitle}"
+                                                   Style="{StaticResource PageTitleTextStyle}"
+                                                   FontSize="24" />
+                                    </StackPanel>
+
+                                    <Button Content="Создать резервную копию"
+                                            Click="CreateBackupButton_OnClick"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            Margin="-6,0,0,0" />
+                                </Grid>
+
+                                <TextBox x:Name="BackupCommentTextBox"
+                                         Grid.Row="1"
+                                         Margin="0,20,0,0"
+                                         Text="{Binding BackupComment, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource AppTextBoxStyle}" />
+
+                                <Grid Grid.Row="2"
+                                      Margin="0,20,0,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Text="{Binding BackupSummary}"
+                                               Style="{StaticResource PageDescriptionTextStyle}" />
+
+                                    <Border Grid.Row="1"
+                                            Margin="0,12,0,0"
+                                            Padding="4"
+                                            Background="#FFF8FAFD"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="18">
+                                        <DataGrid ItemsSource="{Binding Backups}"
+                                                  SelectedItem="{Binding SelectedBackup, Mode=TwoWay}"
+                                                  AutoGenerateColumns="False"
+                                                  CanUserAddRows="False"
+                                                  IsReadOnly="True"
+                                                  Style="{StaticResource AppDataGridStyle}">
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Файл"
+                                                                    ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                    Binding="{Binding Name}" />
+                                                <DataGridTextColumn Header="Дата"
+                                                                    ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                    Binding="{Binding CreatedAt, StringFormat=dd.MM.yyyy HH:mm}" />
+                                                <DataGridTextColumn Header="Кем"
+                                                                    ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                    Binding="{Binding CreatedBy}" />
+                                                <DataGridTextColumn Header="Статус"
+                                                                    ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                    Binding="{Binding Status}" />
+                                            </DataGrid.Columns>
+                                        </DataGrid>
+                                    </Border>
+
+                                    <StackPanel Grid.Row="2"
+                                                Margin="0,16,0,0"
+                                                Orientation="Horizontal">
+                                        <Button Content="Восстановить выбранную"
+                                                Click="RestoreBackupButton_OnClick"
+                                                Style="{StaticResource SecondaryButtonStyle}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="2"
+                                Style="{StaticResource PanelCardStyle}"
+                                Margin="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel>
+                                        <TextBlock Text="Журнал критичных действий"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBlock Margin="0,8,0,0"
+                                                   Text="Журнал аудита"
+                                                   Style="{StaticResource PageTitleTextStyle}"
+                                                   FontSize="24" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBox Grid.Row="1"
+                                         Margin="0,20,0,0"
+                                         Text="{Binding AuditFilterText, UpdateSourceTrigger=PropertyChanged}"
+                                         Style="{StaticResource AppTextBoxStyle}" />
+
+                                <Border Grid.Row="2"
+                                        Margin="0,20,0,0"
+                                        Padding="4"
+                                        Background="#FFF8FAFD"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="18">
+                                    <DataGrid ItemsSource="{Binding FilteredEntries}"
+                                              AutoGenerateColumns="False"
+                                              CanUserAddRows="False"
+                                              IsReadOnly="True"
+                                              Style="{StaticResource AppDataGridStyle}">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Время"
+                                                                ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                Binding="{Binding OccurredAt, StringFormat=dd.MM HH:mm}" />
+                                            <DataGridTextColumn Header="Кто"
+                                                                ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                Binding="{Binding Actor}" />
+                                            <DataGridTextColumn Header="Действие"
+                                                                ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                Binding="{Binding Action}" />
+                                            <DataGridTextColumn Header="Объект"
+                                                                ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                Binding="{Binding Target}" />
+                                            <DataGridTextColumn Header="Детали"
+                                                                ElementStyle="{StaticResource CenteredDataGridTextStyle}"
+                                                                Binding="{Binding Details}" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</Page>

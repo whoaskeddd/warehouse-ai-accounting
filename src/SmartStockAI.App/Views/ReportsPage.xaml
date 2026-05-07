@@ -1,0 +1,138 @@
+<Page x:Class="SmartStockAI.App.Views.ReportsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      mc:Ignorable="d"
+      Background="Transparent"
+      Title="Отчеты">
+    <Page.Resources>
+        <Style x:Key="CenteredPreviewTextStyle"
+               TargetType="TextBlock"
+               BasedOn="{StaticResource CenteredDataGridTextStyle}">
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="CenteredPreviewCellStyle"
+               TargetType="DataGridCell"
+               BasedOn="{StaticResource {x:Type DataGridCell}}">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="TextBlock.TextAlignment" Value="Center" />
+        </Style>
+    </Page.Resources>
+    <ScrollViewer Style="{StaticResource PageScrollViewerStyle}">
+        <Grid Margin="0,0,0,8">
+            <Border Style="{StaticResource PageContainerStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="АНАЛИТИКА"
+                                   Style="{StaticResource SectionEyebrowTextStyle}" />
+                        <TextBlock Margin="0,10,0,0"
+                                   Text="Отчеты"
+                                   Style="{StaticResource PageTitleTextStyle}" />
+                        <TextBlock Margin="0,8,0,0"
+                                   Text="Стандартные отчеты по складу с предпросмотром и экспортом в Excel."
+                                   Style="{StaticResource PageDescriptionTextStyle}" />
+                    </StackPanel>
+
+                    <Grid Grid.Row="1"
+                          Margin="0,26,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Orientation="Horizontal">
+                            <Button Content="Обновить предпросмотр"
+                                    Click="RefreshPreviewButton_OnClick"
+                                    Style="{StaticResource PrimaryButtonStyle}" />
+                            <Button Margin="12,0,0,0"
+                                    Content="Экспорт в Excel"
+                                    Click="ExportExcelButton_OnClick"
+                                    Style="{StaticResource SecondaryButtonStyle}" />
+                        </StackPanel>
+
+                        <Border Grid.Column="1"
+                                Style="{StaticResource PillBadgeStyle}"
+                                VerticalAlignment="Center">
+                            <TextBlock Text="{Binding PreviewMetaText}"
+                                       Foreground="{StaticResource TextSecondaryBrush}" />
+                        </Border>
+                    </Grid>
+
+                    <Grid Grid.Row="2"
+                          Margin="0,26,0,0">
+                        <Border Style="{StaticResource PanelCardStyle}"
+                                Margin="0">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel>
+                                        <TextBlock Text="Текущий отчет"
+                                                   Style="{StaticResource CardCaptionTextStyle}" />
+                                        <TextBlock Margin="0,8,0,0"
+                                                   Text="{Binding PreviewTitle}"
+                                                   Style="{StaticResource PageTitleTextStyle}"
+                                                   FontSize="24" />
+                                    </StackPanel>
+
+                                    <ComboBox Grid.Column="1"
+                                              Width="260"
+                                              Margin="16,0,0,0"
+                                              ItemsSource="{Binding ReportDefinitions}"
+                                              SelectedItem="{Binding SelectedDefinition}"
+                                              DisplayMemberPath="Name"
+                                              Style="{StaticResource AppComboBoxStyle}"
+                                              VerticalAlignment="Top" />
+                                </Grid>
+
+                                <TextBlock Grid.Row="1"
+                                           Margin="0,8,0,0"
+                                           Text="{Binding PreviewSummary}"
+                                           Style="{StaticResource PageDescriptionTextStyle}" />
+
+                                <Border Grid.Row="2"
+                                        Margin="0,18,0,0"
+                                        Padding="4"
+                                        Background="#FFF8FAFD"
+                                        BorderBrush="{StaticResource BorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="18">
+                                    <DataGrid AutoGenerateColumns="True"
+                                              AutoGeneratingColumn="PreviewDataGrid_OnAutoGeneratingColumn"
+                                              CanUserAddRows="False"
+                                              CellStyle="{StaticResource CenteredPreviewCellStyle}"
+                                              HeadersVisibility="Column"
+                                              IsReadOnly="True"
+                                              ItemsSource="{Binding PreviewRows}"
+                                              Style="{StaticResource AppDataGridStyle}">
+                                        <DataGrid.Resources>
+                                            <Style TargetType="TextBlock"
+                                                   BasedOn="{StaticResource CenteredPreviewTextStyle}" />
+                                        </DataGrid.Resources>
+                                    </DataGrid>
+                                </Border>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</Page>
